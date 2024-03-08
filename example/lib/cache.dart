@@ -12,6 +12,7 @@ abstract class Cache implements BaseCache {
   @CacheKey(name: 'device_id')
   CacheEntry<Iterable<String>> deviceId();
 
+  @CacheKey(fromJson: User.fromJson, toJson: userToJson)
   CacheEntry<User> me();
 
   @CacheKey(name: 'friends')
@@ -28,4 +29,8 @@ abstract class Cache implements BaseCache {
     @KeyPart('test') int testId,
     @sortBy int userId,
   );
+}
+
+dynamic userToJson(User user) {
+  return User(user.name, 58).toJson();
 }

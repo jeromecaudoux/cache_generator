@@ -14,7 +14,6 @@ class LocalStoreCacheGenerator extends GeneratorForAnnotation<LocalStoreCache> {
     BuildStep buildStep,
   ) {
     String name = annotation.read('name').stringValue;
-    print('Generating cache for $name');
 
     final Visitor visitor = Visitor(name);
     // Visit class fields and constructor

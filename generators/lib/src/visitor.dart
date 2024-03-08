@@ -117,16 +117,16 @@ class Visitor extends SimpleElementVisitor<void> {
     String name = element.name;
     String? fromJson;
     String? toJson;
-    if (cacheKey == null) {
+    if (cacheKey != null) {
       // Look for a key in the method name
-      String? keyName = cacheKey?.getField('name')?.toStringValue();
+      String? keyName = cacheKey.getField('name')?.toStringValue();
       if (keyName != null) {
         name = keyName;
       }
 
       // Look for the fromJson and toJson
-      fromJson = cacheKey?.getField('fromJson')?.toStringValue();
-      toJson = cacheKey?.getField('toJson')?.toStringValue();
+      fromJson = cacheKey.getField('fromJson')?.toFunctionValue()?.displayName;
+      toJson = cacheKey.getField('toJson')?.toFunctionValue()?.displayName;
     }
     Map<String, String> keyParts = {};
     for (ParameterElement parameter in element.parameters) {

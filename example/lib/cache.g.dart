@@ -15,7 +15,7 @@ class _Cache with LocalStoreCacheMixIn implements Cache {
   @override
   CacheEntry<Iterable<String>> deviceId() => SimpleCacheEntry(
         cache: this,
-        key: 'deviceId',
+        key: 'device_id',
         id: null,
         isPersistent: true,
         fromJson: (json) => (json as List).map((e) => e as String).toList(),
@@ -29,7 +29,7 @@ class _Cache with LocalStoreCacheMixIn implements Cache {
         id: null,
         isPersistent: false,
         fromJson: User.fromJson,
-        toJson: null,
+        toJson: userToJson,
       );
 
   @override
@@ -46,7 +46,7 @@ class _Cache with LocalStoreCacheMixIn implements Cache {
   CacheEntry<double> ageOfFriend(int userId, String friendName) =>
       SimpleCacheEntry(
         cache: this,
-        key: 'ageOfFriend',
+        key: 'age_of_friend-$userId-$friendName',
         id: null,
         isPersistent: false,
         fromJson: (json) => json as double,
@@ -56,7 +56,7 @@ class _Cache with LocalStoreCacheMixIn implements Cache {
   @override
   CacheEntry<double?> users(int testId, int userId) => SimpleCacheEntry(
         cache: this,
-        key: 'users',
+        key: 'users-$testId',
         id: '$userId',
         isPersistent: false,
         fromJson: (json) => json as double?,

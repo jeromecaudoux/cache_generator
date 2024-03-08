@@ -1,4 +1,5 @@
 import 'package:example/cache.dart';
+import 'package:example/user.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -60,6 +61,9 @@ class _MyHomePageState extends State<MyHomePage> {
     // Cache.instance.
     Cache.instance.deviceId().set(['lol', 'ok']).then(
       (value) async => print(await Cache.instance.deviceId().get()),
+    );
+    Cache.instance.me().set(User('Someone', 26)).then(
+      (value) async => print(await Cache.instance.me().get()),
     );
   }
 

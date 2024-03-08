@@ -4,10 +4,10 @@ class LocalStoreCache {
   const LocalStoreCache(this.name);
 }
 
-class CacheKey {
+class CacheKey<T> {
   final String? name;
-  final CacheFromJson? fromJson;
-  final CacheToJson? toJson;
+  final CacheFromJson<T>? fromJson;
+  final CacheToJson<T>? toJson;
 
   const CacheKey({this.name, this.fromJson, this.toJson});
 }

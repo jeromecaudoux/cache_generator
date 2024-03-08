@@ -12,4 +12,9 @@ class User {
     'name': name,
     'age': age,
   };
+
+  @override
+  String toString() {
+    return 'User{name: $name, age: $age}';
+  }
 }
