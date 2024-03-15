@@ -63,8 +63,12 @@ class _MyHomePageState extends State<MyHomePage> {
       (value) async => print(await Cache.instance.deviceId().get()),
     );
     Cache.instance.me().set(User('Someone', 26)).then(
-      (value) async => print(await Cache.instance.me().get()),
-    );
+          (value) async => print(await Cache.instance.me().get()),
+        );
+    Cache.instance.ageOfFriend(12, 'joe').set(42).then(
+          (value) async =>
+              print(await Cache.instance.ageOfFriend(12, 'joe').get()),
+        );
   }
 
   @override
@@ -74,8 +78,27 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: const Center(
-        child: Text('You have pushed the button this many times:'),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            TextButton(
+              onPressed: _testExpiration,
+              child: const Text('Test expiration'),
+            ),
+            TextButton(
+              onPressed: () =>
+                  Cache.instance.deleteAll().then((value) => print('deleted')),
+              child: const Text('Delete all'),
+            ),
+            TextButton(
+              onPressed: () => Cache.instance
+                  .deleteAll(deletePersistent: true)
+                  .then((value) => print('deleted')),
+              child: const Text('Delete all (with persistent)'),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
@@ -83,5 +106,22 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  Future<void> _testExpiration() async {
+    await Cache.instance
+        .friends()
+        .set(1)
+        .then((value) => debugPrint('Value saved: $value'))
+        .then((value) => Future.delayed(const Duration(seconds: 3)))
+        .then((value) => Cache.instance.friends().get())
+        .then((value) => debugPrint('Value is: $value (should be null)'));
+    await Cache.instance
+        .friends()
+        .set(1, maxAge: const Duration(seconds: 4))
+        .then((value) => debugPrint('Value saved: $value'))
+        .then((value) => Future.delayed(const Duration(seconds: 3)))
+        .then((value) => Cache.instance.friends().get())
+        .then((value) => debugPrint('Value is: $value (should be 1)'));
   }
 }

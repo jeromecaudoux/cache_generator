@@ -16,22 +16,16 @@ mixin LocalStoreCacheMixIn implements BaseCache {
   @override
   Future<void> deleteAll({bool deletePersistent = false}) {
     if (!deletePersistent) {
-      return deleteDoc(_notPersistentKey);
+      _db.collection(_notPersistentKey).delete();
     }
-    return _db.delete();
+    return _local.delete();
   }
 
   @override
   Future<int> cacheSize() async {
-    int total = 0;
-    // Just audio cache
-    final cacheDir = await getTemporaryDirectory();
-    total += _directorySize(cacheDir.path);
-    // Database size minus the ignored values file size
     final docDir = await getApplicationDocumentsDirectory();
     String path = '${docDir.path}${_db.path}.collection/$_notPersistentKey';
-    total += _directorySize(path);
-    return total;
+    return _directorySize(path);
   }
 
   static int _directorySize(String dirPath) {
@@ -71,24 +65,26 @@ mixin LocalStoreCacheMixIn implements BaseCache {
     String id,
     T item, {
     CacheToJson<T>? toJson,
+    Duration? maxAge,
     bool isPersistent = false,
   }) =>
       _db
           .collection(_getDocName(key, isPersistent: isPersistent))
           .doc(id)
-          .set(_zip(item, toJson))
+          .set(_zip(item, maxAge, toJson))
           .then((value) => item);
 
   Future<T?> get<T>(
     String key,
     String id,
     CacheFromJson<T> fromJson, {
+    Duration? maxAge,
     bool isPersistent = false,
   }) async {
     final DocumentRef ref =
         _db.collection(_getDocName(key, isPersistent: isPersistent)).doc(id);
     final value = await ref.get();
-    final dynamic data = _unzip(value);
+    final dynamic data = _unzip('$key/$id', value, maxAge);
     if (data == null) {
       return null;
     }
@@ -114,12 +110,35 @@ mixin LocalStoreCacheMixIn implements BaseCache {
     }
   }
 
-  Map<String, dynamic> _zip<T>(T item, CacheToJson<T>? toJson) {
+  Map<String, dynamic> _zip<T>(
+    T item,
+    Duration? maxAge,
+    CacheToJson<T>? toJson,
+  ) {
     return {
       'createdAt': DateTime.now().millisecondsSinceEpoch,
+      'maxAge': maxAge?.inMicroseconds,
       'cache': toJson?.call(item) ?? _defaultToJson(item),
     };
   }
 
-  dynamic _unzip(Map<String, dynamic>? data) => data?['cache'];
+  /// maxAge (method parameter) is the duration provided by the method annotation MaxAge
+  /// data?['maxAge'] is the max age duration stored in the cache and
+  /// provided by {@CacheEntry#set}
+  dynamic _unzip(String tag, Map<String, dynamic>? data, Duration? maxAge) {
+    DateTime? createdAt = data?['createdAt'] != null
+        ? DateTime.fromMillisecondsSinceEpoch(data?['createdAt'])
+        : null;
+    Duration? maxAgeToUse = data?['maxAge'] != null
+        ? Duration(microseconds: data!['maxAge'])
+        : maxAge;
+    if (createdAt != null && maxAgeToUse != null) {
+      final diff = DateTime.now().difference(createdAt);
+      if (diff > maxAgeToUse) {
+        debugPrint('Cache expired for "$tag": $diff > $maxAgeToUse');
+        return null;
+      }
+    }
+    return data?['cache'];
+  }
 }

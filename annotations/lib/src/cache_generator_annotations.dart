@@ -18,6 +18,12 @@ class KeyPart {
   const KeyPart(this.name);
 }
 
+class MaxAge {
+  final Duration maxAge;
+
+  const MaxAge(this.maxAge);
+}
+
 class SortBy {
   const SortBy();
 }

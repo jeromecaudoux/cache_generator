@@ -58,6 +58,7 @@ class LocalStoreCacheGenerator extends GeneratorForAnnotation<LocalStoreCache> {
     String parameters = _generateMethodParameters(meta.parameters);
     String key = meta.key.formatKey();
     String? sortBy = meta.formatSortBy();
+
     buffer.writeln(
       'CacheEntry<$returnType> $methodName($parameters) => '
       'SimpleCacheEntry('
@@ -65,6 +66,7 @@ class LocalStoreCacheGenerator extends GeneratorForAnnotation<LocalStoreCache> {
       'key: \'$key\', '
       'id: ${sortBy == null ? null : "'$sortBy'"}, '
       'isPersistent: ${meta.isPersistent},'
+      'maxAge: ${meta.maxAge == null ? 'null' : 'const Duration(microseconds: ${meta.maxAge!.inMicroseconds})'},'
       'fromJson: ${_generateFromJson(returnType, meta.key)},'
       'toJson: ${meta.key.toJson},'
       ');',

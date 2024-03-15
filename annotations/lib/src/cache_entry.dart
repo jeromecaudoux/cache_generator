@@ -1,11 +1,12 @@
-import 'package:annotations/src/local_store_cache_mixin.dart';
 import 'package:annotations/src/cache_generator_annotations.dart';
+import 'package:annotations/src/local_store_cache_mixin.dart';
 
 class SimpleCacheEntry<T> implements CacheEntry<T> {
   final LocalStoreCacheMixIn cache;
   final String key;
   final String? id;
   final bool isPersistent;
+  final Duration? maxAge;
   final CacheFromJson<T> fromJson;
   final CacheToJson<T>? toJson;
 
@@ -14,17 +15,19 @@ class SimpleCacheEntry<T> implements CacheEntry<T> {
     required this.key,
     required this.id,
     required this.isPersistent,
+    required this.maxAge,
     required this.fromJson,
     required this.toJson,
   });
 
   @override
-  Future<T> set(T value) async {
+  Future<T> set(T value, {Duration? maxAge}) async {
     return cache.set(
       key,
       _id,
       value,
       isPersistent: isPersistent,
+      maxAge: maxAge,
       toJson: toJson,
     );
   }
@@ -37,6 +40,7 @@ class SimpleCacheEntry<T> implements CacheEntry<T> {
       key,
       _id,
       fromJson,
+      maxAge: maxAge,
       isPersistent: isPersistent,
     );
   }
@@ -46,7 +50,7 @@ class SimpleCacheEntry<T> implements CacheEntry<T> {
 }
 
 abstract class CacheEntry<T> {
-  Future<T> set(T value);
+  Future<T> set(T value, {Duration? maxAge});
 
   Future<T?> get();
 

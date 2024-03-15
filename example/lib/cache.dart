@@ -15,10 +15,11 @@ abstract class Cache implements BaseCache {
   @CacheKey(fromJson: User.fromJson, toJson: userToJson)
   CacheEntry<User> me();
 
+  @MaxAge(Duration(seconds: 2))
   @CacheKey(name: 'friends')
-  CacheEntry<Iterable<User>> friends();
+  CacheEntry<int> friends();
 
-  @CacheKey(name: 'age_of_friend-{id}-{name}')
+  @CacheKey(name: 'age_of_friend-{id}/{name}')
   CacheEntry<double> ageOfFriend(
     @KeyPart('id') int userId,
     @KeyPart('name') String friendName,

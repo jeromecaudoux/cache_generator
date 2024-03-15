@@ -4,7 +4,8 @@ import 'package:analyzer/dart/element/visitor.dart';
 import 'package:annotations/generators.dart';
 import 'package:source_gen/source_gen.dart';
 
-RegExp _cacheEntryReturnRegExp = RegExp(r'^CacheEntry<(?<type>[a-zA-Z<>]+\??)>$');
+RegExp _cacheEntryReturnRegExp =
+    RegExp(r'^CacheEntry<(?<type>[a-zA-Z<>]+\??)>$');
 
 class CacheEntryMetadata {
   final String type;
@@ -12,6 +13,7 @@ class CacheEntryMetadata {
   final Map<String, String> parameters;
   final Iterable<String> sortBy;
   final KeyMetadata key;
+  final Duration? maxAge;
   final bool isPersistent;
 
   CacheEntryMetadata({
@@ -20,6 +22,7 @@ class CacheEntryMetadata {
     required this.parameters,
     required this.sortBy,
     required this.key,
+    required this.maxAge,
     required this.isPersistent,
   });
 
@@ -84,6 +87,7 @@ class Visitor extends SimpleElementVisitor<void> {
           parameters: _getParameters(element),
           sortBy: _getSortBy(element),
           key: _getKeyOfMethod(element),
+          maxAge: _getMaxAge(element),
           isPersistent: _methodHasAnnotation(Persistent, element) != null,
         ),
       );
@@ -112,6 +116,19 @@ class Visitor extends SimpleElementVisitor<void> {
     return sortBy;
   }
 
+  Duration? _getMaxAge(MethodElement element) {
+    DartObject? maxAge = _methodHasAnnotation(MaxAge, element);
+    Duration? duration;
+    if (maxAge != null) {
+      dynamic microseconds =
+          maxAge.getField('maxAge')?.getField('_duration')?.toIntValue();
+      if (microseconds != null) {
+        duration = Duration(microseconds: microseconds);
+      }
+    }
+    return duration;
+  }
+
   KeyMetadata _getKeyOfMethod(MethodElement element) {
     DartObject? cacheKey = _methodHasAnnotation(CacheKey, element);
     String name = element.name;
@@ -135,7 +152,7 @@ class Visitor extends SimpleElementVisitor<void> {
         DartObject obj = annotation.computeConstantValue()!;
         if (obj.type!.getDisplayString(withNullability: true) == 'KeyPart') {
           String name = obj.getField('name')!.toStringValue()!;
-          // todo throw is the name is already in the keyParts or if the name is not in the key
+          // todo throw if the name is already in the keyParts or if the name is not in the key
           keyParts[name] = parameter.name;
         }
       }

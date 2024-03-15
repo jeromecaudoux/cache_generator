@@ -18,6 +18,7 @@ class _Cache with LocalStoreCacheMixIn implements Cache {
         key: 'device_id',
         id: null,
         isPersistent: true,
+        maxAge: null,
         fromJson: (json) => (json as List).map((e) => e as String).toList(),
         toJson: null,
       );
@@ -28,17 +29,19 @@ class _Cache with LocalStoreCacheMixIn implements Cache {
         key: 'me',
         id: null,
         isPersistent: false,
+        maxAge: null,
         fromJson: User.fromJson,
         toJson: userToJson,
       );
 
   @override
-  CacheEntry<Iterable<User>> friends() => SimpleCacheEntry(
+  CacheEntry<int> friends() => SimpleCacheEntry(
         cache: this,
         key: 'friends',
         id: null,
         isPersistent: false,
-        fromJson: (json) => (json as List).map(User.fromJson).toList(),
+        maxAge: const Duration(microseconds: 2000000),
+        fromJson: (json) => json as int,
         toJson: null,
       );
 
@@ -46,9 +49,10 @@ class _Cache with LocalStoreCacheMixIn implements Cache {
   CacheEntry<double> ageOfFriend(int userId, String friendName) =>
       SimpleCacheEntry(
         cache: this,
-        key: 'age_of_friend-$userId-$friendName',
+        key: 'age_of_friend-$userId/$friendName',
         id: null,
         isPersistent: false,
+        maxAge: null,
         fromJson: (json) => json as double,
         toJson: null,
       );
@@ -59,6 +63,7 @@ class _Cache with LocalStoreCacheMixIn implements Cache {
         key: 'users-$testId',
         id: '$userId',
         isPersistent: false,
+        maxAge: null,
         fromJson: (json) => json as double?,
         toJson: null,
       );
