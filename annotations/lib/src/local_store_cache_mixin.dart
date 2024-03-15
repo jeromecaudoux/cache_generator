@@ -86,6 +86,8 @@ mixin LocalStoreCacheMixIn implements BaseCache {
     final value = await ref.get();
     final dynamic data = _unzip('$key/$id', value, maxAge);
     if (data == null) {
+      // Delete in cache if expired
+      await ref.delete();
       return null;
     }
     try {
