@@ -2,7 +2,6 @@ This package is a type conversion generator using source_gen and inspired by Ret
 to help you manage persistent cache.
 
 ## Usage
-# Generator
 
 Add the annotations and generators to your dependencies
 ```yaml 
@@ -14,7 +13,7 @@ dev_dependencies:
   cache_generators: ^1.0.0
 ```
 
-## Define and Generate your API
+## Define your cache
 
 ```dart
 import 'package:cache_annotations/annotations.dart';
@@ -41,13 +40,9 @@ abstract class Cache implements BaseCache {
   @CacheKey(name: 'friends/{id}')
   CacheEntry<String> friendById(@KeyPart('id') int userId);
 }
-
-dynamic userToJson(User user) {
-  return User(user.name, 58).toJson();
-}
 ```
 
-## then run the generator
+## Run the generator
 
 ```shell
 # dart
@@ -61,13 +56,13 @@ flutter pub run build_runner build
 
 ```dart
     Cache cache = Cache.instance;
-    await cache.deviceId().set(['lol', 'ok']);
+    await cache.deviceId().set(['dummy', 'ok']);
     print(await cache.deviceId().get());
     
     await cache.me().set(User('Someone', 26));
     print(await cache.me().get());
     
-    await cache.friendById(12).set('joe');
+    await cache.friendById(12).set('Joe');
     print(await cache.friendById(12).get());
 ```
 

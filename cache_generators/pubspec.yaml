@@ -1,7 +1,7 @@
 name: cache_generators
-description: "A new Flutter project."
-version: 0.0.1
-homepage:
+description: "This package is a type conversion generator using source_gen and inspired by Retrofit to help you manage persistent cache."
+version: 1.0.0
+homepage: https://github.com/jeromecaudoux/cache_generator/
 publish_to: none
 
 environment:
