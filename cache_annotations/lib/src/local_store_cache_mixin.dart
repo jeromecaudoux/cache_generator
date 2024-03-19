@@ -47,44 +47,53 @@ mixin LocalStoreCacheMixIn implements BaseCache {
     return totalSize;
   }
 
-  Future<void> delete(String key, String id, {bool isPersistent = false}) {
-    return _db
-        .collection(_getDocName(key, isPersistent: isPersistent))
-        .doc(id)
-        .delete();
+  Future<void> delete(
+    String path,
+    String? name, {
+    bool isPersistent = false,
+  }) {
+    return _documentRef(path, name, isPersistent: isPersistent).delete();
   }
 
-  Future<void> deleteDoc(String key, {bool isPersistent = false}) =>
-      _db.collection(_getDocName(key, isPersistent: isPersistent)).delete();
+  // Future<void> deleteDoc(String path, {bool isPersistent = false}) =>
+  //     _db.collection(_getCollection(path, isPersistent: isPersistent)).delete();
 
-  String _getDocName(String key, {required bool isPersistent}) =>
-      isPersistent ? key : '$_notPersistentKey/$key';
+  DocumentRef _documentRef(
+    String path,
+    String? name, {
+    required bool isPersistent,
+  }) {
+    String prefix = isPersistent ? '' : '$_notPersistentKey/';
+    if (name?.isNotEmpty == true) {
+      return _db.collection('$prefix$path').doc(name!);
+    } else {
+      return _db.collection('${prefix}values').doc(path);
+    }
+  }
 
   Future<T> set<T>(
-    String key,
-    String id,
+    String path,
+    String? name,
     T item, {
     CacheToJson<T>? toJson,
     Duration? maxAge,
     bool isPersistent = false,
   }) =>
-      _db
-          .collection(_getDocName(key, isPersistent: isPersistent))
-          .doc(id)
+      _documentRef(path, name, isPersistent: isPersistent)
           .set(_zip(item, maxAge, toJson))
           .then((value) => item);
 
   Future<T?> get<T>(
-    String key,
-    String id,
+    String path,
+    String? name,
     CacheFromJson<T> fromJson, {
     Duration? maxAge,
     bool isPersistent = false,
   }) async {
     final DocumentRef ref =
-        _db.collection(_getDocName(key, isPersistent: isPersistent)).doc(id);
+        _documentRef(path, name, isPersistent: isPersistent);
     final value = await ref.get();
-    final dynamic data = _unzip('$key/$id', value, maxAge);
+    final dynamic data = _unzip('$path/$name', value, maxAge);
     if (data == null) {
       // Delete in cache if expired
       await ref.delete();

@@ -33,7 +33,11 @@ class LocalStoreCacheGenerator extends GeneratorForAnnotation<LocalStoreCache> {
     String className = visitor.className;
     final buffer = StringBuffer();
     buffer.writeln(
-        'class _$className with LocalStoreCacheMixIn implements $className {');
+      '// ignore_for_file: unnecessary_string_interpolations',
+    );
+    buffer.writeln(
+      'class _$className extends $className with LocalStoreCacheMixIn {',
+    );
     buffer.writeln('_$className();');
 
     _generateName(buffer, visitor.name);
@@ -56,15 +60,15 @@ class LocalStoreCacheGenerator extends GeneratorForAnnotation<LocalStoreCache> {
 
     buffer.writeln('\n@override');
     String parameters = _generateMethodParameters(meta.parameters);
-    String key = meta.key.formatKey();
-    String? sortBy = meta.formatSortBy();
+    String path = meta.key.formatPath();
+    String? name = meta.formatSortBy();
 
     buffer.writeln(
       'CacheEntry<$returnType> $methodName($parameters) => '
       'SimpleCacheEntry('
       'cache: this, '
-      'key: \'$key\', '
-      'id: ${sortBy == null ? null : "'$sortBy'"}, '
+      'path: \'$path\', '
+      'name: ${name?.isNotEmpty == true ? '\'$name\'' : 'null'}, '
       'isPersistent: ${meta.isPersistent},'
       'maxAge: ${meta.maxAge == null ? 'null' : 'const Duration(microseconds: ${meta.maxAge!.inMicroseconds})'},'
       'fromJson: ${_generateFromJson(returnType, meta.key)},'

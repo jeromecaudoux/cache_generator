@@ -5,17 +5,18 @@ class LocalStoreCache {
 }
 
 class CacheKey<T> {
-  final String? name;
+  final String? path;
   final CacheFromJson<T>? fromJson;
   final CacheToJson<T>? toJson;
 
-  const CacheKey({this.name, this.fromJson, this.toJson});
+  const CacheKey({this.path, this.fromJson, this.toJson});
 }
 
-class KeyPart {
+class Path<T, R> {
   final String name;
+  final PathConvertor<T, R>? convert;
 
-  const KeyPart(this.name);
+  const Path(this.name, {this.convert});
 }
 
 class MaxAge {
@@ -24,8 +25,10 @@ class MaxAge {
   const MaxAge(this.maxAge);
 }
 
-class SortBy {
-  const SortBy();
+class SortBy<T, R> {
+  final PathConvertor<T, R>? convert;
+
+  const SortBy({this.convert});
 }
 
 class Persistent {
@@ -35,5 +38,6 @@ class Persistent {
 const sortBy = SortBy();
 const persistent = Persistent();
 
+typedef PathConvertor<T, R> = R Function(T value);
 typedef CacheFromJson<T> = T? Function(dynamic json);
 typedef CacheToJson<T> = dynamic Function(T value);

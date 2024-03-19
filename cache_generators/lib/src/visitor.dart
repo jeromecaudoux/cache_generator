@@ -35,25 +35,27 @@ class CacheEntryMetadata {
 
   @override
   String toString() {
-    return 'CacheEntryMetadata{type: $type, name: $name, parameters: $parameters, sortBy: $sortBy, key: $key, isPersistent: $isPersistent}';
+    return 'CacheEntryMetadata{type: $type, name: $name, '
+        'parameters: $parameters, sortBy: $sortBy, key: $key, '
+        'isPersistent: $isPersistent}';
   }
 }
 
 class KeyMetadata {
-  final String name;
+  final String path;
   final Map<String, String> keyParts;
   final String? fromJson;
   final String? toJson;
 
   KeyMetadata(
-    this.name, {
+    this.path, {
     this.keyParts = const {},
     this.fromJson,
     this.toJson,
   });
 
-  String formatKey() {
-    String result = name;
+  String formatPath() {
+    String result = path;
     for (String key in keyParts.keys) {
       result = result.replaceAll('{$key}', '\$${keyParts[key]}');
     }
@@ -107,10 +109,22 @@ class Visitor extends SimpleElementVisitor<void> {
   Iterable<String> _getSortBy(MethodElement element) {
     List<String> sortBy = [];
     for (ParameterElement parameter in element.parameters) {
-      if (const TypeChecker.fromRuntime(SortBy)
-          .annotationsOf(parameter)
-          .isNotEmpty) {
-        sortBy.add(parameter.name);
+      // Look for the key parts
+      for (ElementAnnotation annotation in parameter.metadata) {
+        DartObject obj = annotation.computeConstantValue()!;
+        if (obj.type!
+            .getDisplayString(withNullability: true)
+            .startsWith('SortBy<')) {
+          String? convert =
+              obj.getField('convert')?.toFunctionValue()?.displayName;
+          String name = convert == null
+              ? parameter.name
+              : '{$convert(${parameter.name})}';
+          if (sortBy.contains(name)) {
+            throw Exception('The sortBy $name is already defined');
+          }
+          sortBy.add(name);
+        }
       }
     }
     return sortBy;
@@ -131,14 +145,14 @@ class Visitor extends SimpleElementVisitor<void> {
 
   KeyMetadata _getKeyOfMethod(MethodElement element) {
     DartObject? cacheKey = _methodHasAnnotation(CacheKey, element);
-    String name = element.name;
+    String path = element.name;
     String? fromJson;
     String? toJson;
     if (cacheKey != null) {
       // Look for a key in the method name
-      String? keyName = cacheKey.getField('name')?.toStringValue();
+      String? keyName = cacheKey.getField('path')?.toStringValue();
       if (keyName != null) {
-        name = keyName;
+        path = keyName;
       }
 
       // Look for the fromJson and toJson
@@ -147,18 +161,29 @@ class Visitor extends SimpleElementVisitor<void> {
     }
     Map<String, String> keyParts = {};
     for (ParameterElement parameter in element.parameters) {
-      // Look for the key parts
+      // Look for the path parts
       for (ElementAnnotation annotation in parameter.metadata) {
         DartObject obj = annotation.computeConstantValue()!;
-        if (obj.type!.getDisplayString(withNullability: true) == 'KeyPart') {
+        if (obj.type!
+            .getDisplayString(withNullability: true)
+            .startsWith('Path<')) {
           String name = obj.getField('name')!.toStringValue()!;
-          // todo throw if the name is already in the keyParts or if the name is not in the key
-          keyParts[name] = parameter.name;
+          String? convert =
+              obj.getField('convert')?.toFunctionValue()?.displayName;
+          if (keyParts.containsKey(name)) {
+            throw Exception('The path part $name is already defined');
+          }
+          if (!path.contains('{$name}')) {
+            throw Exception('The path part $name is not defined in: $path');
+          }
+          keyParts[name] = convert == null
+              ? parameter.name
+              : '{$convert(${parameter.name})}';
         }
       }
     }
     return KeyMetadata(
-      name,
+      path,
       keyParts: keyParts,
       fromJson: fromJson,
       toJson: toJson,

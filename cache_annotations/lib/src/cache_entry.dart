@@ -3,8 +3,8 @@ import 'package:cache_annotations/src/local_store_cache_mixin.dart';
 
 class SimpleCacheEntry<T> implements CacheEntry<T> {
   final LocalStoreCacheMixIn cache;
-  final String key;
-  final String? id;
+  final String path;
+  final String? name;
   final bool isPersistent;
   final Duration? maxAge;
   final CacheFromJson<T> fromJson;
@@ -12,8 +12,8 @@ class SimpleCacheEntry<T> implements CacheEntry<T> {
 
   SimpleCacheEntry({
     required this.cache,
-    required this.key,
-    required this.id,
+    required this.path,
+    required this.name,
     required this.isPersistent,
     required this.maxAge,
     required this.fromJson,
@@ -23,8 +23,8 @@ class SimpleCacheEntry<T> implements CacheEntry<T> {
   @override
   Future<T> set(T value, {Duration? maxAge}) async {
     return cache.set(
-      key,
-      _id,
+      path,
+      name,
       value,
       isPersistent: isPersistent,
       maxAge: maxAge,
@@ -32,13 +32,11 @@ class SimpleCacheEntry<T> implements CacheEntry<T> {
     );
   }
 
-  String get _id => id ?? 'values';
-
   @override
   Future<T?> get() async {
     return cache.get(
-      key,
-      _id,
+      path,
+      name,
       fromJson,
       maxAge: maxAge,
       isPersistent: isPersistent,
@@ -46,7 +44,7 @@ class SimpleCacheEntry<T> implements CacheEntry<T> {
   }
 
   @override
-  Future<void> delete() => cache.delete(key, _id, isPersistent: isPersistent);
+  Future<void> delete() => cache.delete(path, name, isPersistent: isPersistent);
 }
 
 abstract class CacheEntry<T> {

@@ -6,6 +6,7 @@ part of 'cache.dart';
 // LocalStoreCacheGenerator
 // **************************************************************************
 
+// ignore_for_file: unnecessary_string_interpolations
 class _Cache with LocalStoreCacheMixIn implements Cache {
   _Cache();
 
@@ -15,8 +16,8 @@ class _Cache with LocalStoreCacheMixIn implements Cache {
   @override
   CacheEntry<Iterable<String>> deviceId() => SimpleCacheEntry(
         cache: this,
-        key: 'device_id',
-        id: null,
+        path: 'device_id',
+        name: null,
         isPersistent: true,
         maxAge: null,
         fromJson: (json) => (json as List).map((e) => e as String).toList(),
@@ -26,8 +27,8 @@ class _Cache with LocalStoreCacheMixIn implements Cache {
   @override
   CacheEntry<User> me() => SimpleCacheEntry(
         cache: this,
-        key: 'me',
-        id: null,
+        path: 'me',
+        name: null,
         isPersistent: false,
         maxAge: null,
         fromJson: User.fromJson,
@@ -37,8 +38,8 @@ class _Cache with LocalStoreCacheMixIn implements Cache {
   @override
   CacheEntry<int> friends() => SimpleCacheEntry(
         cache: this,
-        key: 'friends',
-        id: null,
+        path: 'friends',
+        name: null,
         isPersistent: false,
         maxAge: const Duration(microseconds: 2000000),
         fromJson: (json) => json as int,
@@ -48,8 +49,19 @@ class _Cache with LocalStoreCacheMixIn implements Cache {
   @override
   CacheEntry<String> friendById(int userId) => SimpleCacheEntry(
         cache: this,
-        key: 'friends/$userId',
-        id: null,
+        path: 'friends/$userId',
+        name: null,
+        isPersistent: false,
+        maxAge: null,
+        fromJson: (json) => json as String,
+        toJson: null,
+      );
+
+  @override
+  CacheEntry<String> likes(DateTime date, DateTime sortBy) => SimpleCacheEntry(
+        cache: this,
+        path: 'likes/${keyDateConvertor(date)}',
+        name: '${keyDateConvertor(sortBy)}',
         isPersistent: false,
         maxAge: null,
         fromJson: (json) => json as String,

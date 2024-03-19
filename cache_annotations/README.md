@@ -38,7 +38,7 @@ abstract class Cache implements BaseCache {
   CacheEntry<int> friends();
 
   @CacheKey(name: 'friends/{id}')
-  CacheEntry<String> friendById(@KeyPart('id') int userId);
+  CacheEntry<String> friendById(@Path('id') int userId);
 }
 ```
 
