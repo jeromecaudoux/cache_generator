@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:annotations/src/base_cache.dart';
-import 'package:annotations/src/cache_generator_annotations.dart';
+import 'package:cache_annotations/src/base_cache.dart';
+import 'package:cache_annotations/src/cache_generator_annotations.dart';
 import 'package:flutter/widgets.dart';
 import 'package:localstore/localstore.dart';
 import 'package:path_provider/path_provider.dart';

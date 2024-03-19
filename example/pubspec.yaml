@@ -1,4 +1,4 @@
-name: example
+name: cache_generator_example
 description: "Sample application for cache_generator"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -24,8 +24,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  annotations:
-    path: ../annotations/
+  cache_annotations:
+    path: ../cache_annotations/
   cupertino_icons: ^1.0.6
 
 dev_dependencies:
@@ -33,8 +33,8 @@ dev_dependencies:
     sdk: flutter
   build_runner: ^2.4.8
   flutter_lints: ^3.0.1
-  generators:
-    path: ../generators/
+  cache_generators:
+    path: ../cache_generators/
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

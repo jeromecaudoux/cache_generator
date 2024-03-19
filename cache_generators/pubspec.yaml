@@ -1,4 +1,4 @@
-name: generators
+name: cache_generators
 description: "A new Flutter project."
 version: 0.0.1
 homepage:
@@ -13,8 +13,8 @@ dependencies:
     sdk: flutter
   build: ^2.4.1
   source_gen: ^1.5.0
-  annotations:
-    path: ../annotations/
+  cache_annotations:
+    path: ../cache_annotations/
   analyzer: ^6.4.1
 
 dev_dependencies:

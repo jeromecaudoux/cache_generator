@@ -1,5 +1,5 @@
-import 'package:annotations/src/cache_generator_annotations.dart';
-import 'package:annotations/src/local_store_cache_mixin.dart';
+import 'package:cache_annotations/src/cache_generator_annotations.dart';
+import 'package:cache_annotations/src/local_store_cache_mixin.dart';
 
 class SimpleCacheEntry<T> implements CacheEntry<T> {
   final LocalStoreCacheMixIn cache;

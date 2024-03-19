@@ -1,7 +1,7 @@
 import 'package:analyzer/dart/element/element.dart';
-import 'package:annotations/generators.dart';
+import 'package:cache_annotations/generators.dart';
 import 'package:build/build.dart';
-import 'package:generators/src/visitor.dart';
+import 'package:cache_generators/src/visitor.dart';
 import 'package:source_gen/source_gen.dart';
 
 RegExp _iterableTypeRegExp = RegExp(r'^Iterable<(?<type>[a-zA-Z<>]+)>$');

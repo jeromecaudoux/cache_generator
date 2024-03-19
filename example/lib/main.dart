@@ -1,5 +1,7 @@
-import 'package:example/cache.dart';
-import 'package:example/user.dart';
+// ignore_for_file: avoid_print
+
+import 'package:cache_generator_example/cache.dart';
+import 'package:cache_generator_example/user.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -13,75 +15,38 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  void _incrementCounter() {
-    // Cache.instance.
-    Cache.instance.deviceId().set(['lol', 'ok']).then(
-      (value) async => print(await Cache.instance.deviceId().get()),
-    );
-    Cache.instance.me().set(User('Someone', 26)).then(
-          (value) async => print(await Cache.instance.me().get()),
-        );
-    Cache.instance.ageOfFriend(12, 'joe').set(42).then(
-          (value) async =>
-              print(await Cache.instance.ageOfFriend(12, 'joe').get()),
-        );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        title: const Text('Cache generator Demo'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            TextButton(
+              onPressed: _test,
+              child: const Text('Test set/get'),
+            ),
             TextButton(
               onPressed: _testExpiration,
               child: const Text('Test expiration'),
@@ -100,12 +65,19 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Test',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  void _test() async {
+    Cache cache = Cache.instance;
+    await cache.deviceId().set(['lol', 'ok']);
+    print(await cache.deviceId().get());
+
+    await cache.me().set(User('Someone', 26));
+    print(await cache.me().get());
+
+    await cache.friendById(12).set('joe');
+    print(await cache.friendById(12).get());
   }
 
   Future<void> _testExpiration() async {

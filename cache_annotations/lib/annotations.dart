@@ -1,4 +1,4 @@
-library annotations;
+library cache_annotations;
 
 export 'src/cache_generator_annotations.dart';
 export 'src/cache_entry.dart';

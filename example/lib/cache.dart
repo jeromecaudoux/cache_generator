@@ -1,5 +1,5 @@
-import 'package:annotations/annotations.dart';
-import 'package:example/user.dart';
+import 'package:cache_annotations/annotations.dart';
+import 'package:cache_generator_example/user.dart';
 
 part 'cache.g.dart';
 
@@ -19,17 +19,8 @@ abstract class Cache implements BaseCache {
   @CacheKey(name: 'friends')
   CacheEntry<int> friends();
 
-  @CacheKey(name: 'age_of_friend-{id}/{name}')
-  CacheEntry<double> ageOfFriend(
-    @KeyPart('id') int userId,
-    @KeyPart('name') String friendName,
-  );
-
-  @CacheKey(name: 'users-{test}')
-  CacheEntry<double?> users(
-    @KeyPart('test') int testId,
-    @sortBy int userId,
-  );
+  @CacheKey(name: 'friends/{id}')
+  CacheEntry<String> friendById(@KeyPart('id') int userId);
 }
 
 dynamic userToJson(User user) {

@@ -46,25 +46,13 @@ class _Cache with LocalStoreCacheMixIn implements Cache {
       );
 
   @override
-  CacheEntry<double> ageOfFriend(int userId, String friendName) =>
-      SimpleCacheEntry(
+  CacheEntry<String> friendById(int userId) => SimpleCacheEntry(
         cache: this,
-        key: 'age_of_friend-$userId/$friendName',
+        key: 'friends/$userId',
         id: null,
         isPersistent: false,
         maxAge: null,
-        fromJson: (json) => json as double,
-        toJson: null,
-      );
-
-  @override
-  CacheEntry<double?> users(int testId, int userId) => SimpleCacheEntry(
-        cache: this,
-        key: 'users-$testId',
-        id: '$userId',
-        isPersistent: false,
-        maxAge: null,
-        fromJson: (json) => json as double?,
+        fromJson: (json) => json as String,
         toJson: null,
       );
 }
