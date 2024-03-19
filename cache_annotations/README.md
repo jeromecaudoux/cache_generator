@@ -27,18 +27,27 @@ abstract class Cache implements BaseCache {
   static Cache get instance => _instance;
 
   @persistent
-  @CacheKey(name: 'device_id')
+  @CacheKey(path: 'device_id')
   CacheEntry<Iterable<String>> deviceId();
 
   @CacheKey(fromJson: User.fromJson, toJson: userToJson)
   CacheEntry<User> me();
 
   @MaxAge(Duration(seconds: 2))
-  @CacheKey(name: 'friends')
+  @CacheKey(path: 'friends')
   CacheEntry<int> friends();
 
-  @CacheKey(name: 'friends/{id}')
-  CacheEntry<String> friendById(@Path('id') int userId);
+  @CacheKey(path: 'friends/{id}')
+  CacheEntry<String> friendById(
+      @Path('id') int userId,
+  );
+
+  @CacheKey(path: 'likes/{date}')
+  CacheEntry<String> likes(
+      @Path('date', convert: keyDateConvertor) DateTime date,
+      @SortBy(convert: keyDateConvertor) DateTime sortBy,
+      @sortBy int test,
+  );
 }
 ```
 
