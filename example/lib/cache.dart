@@ -24,6 +24,11 @@ abstract class Cache implements BaseCache {
     @Path('id') int userId,
   );
 
+  @CacheKey(path: 'search/{query}')
+  CacheEntry<String> search(
+    @Path('query') String? query,
+  );
+
   @CacheKey(path: 'likes/{date}')
   CacheEntry<String> likes(
     @Path('date', convert: keyDateConvertor) DateTime date,

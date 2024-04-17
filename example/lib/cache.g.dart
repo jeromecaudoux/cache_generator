@@ -7,7 +7,7 @@ part of 'cache.dart';
 // **************************************************************************
 
 // ignore_for_file: unnecessary_string_interpolations
-class _Cache with LocalStoreCacheMixIn implements Cache {
+class _Cache extends Cache with LocalStoreCacheMixIn {
   _Cache();
 
   @override
@@ -49,7 +49,18 @@ class _Cache with LocalStoreCacheMixIn implements Cache {
   @override
   CacheEntry<String> friendById(int userId) => SimpleCacheEntry(
         cache: this,
-        path: 'friends/$userId',
+        path: 'friends/${safePath(userId)}',
+        name: null,
+        isPersistent: false,
+        maxAge: null,
+        fromJson: (json) => json as String,
+        toJson: null,
+      );
+
+  @override
+  CacheEntry<String> search(String? query) => SimpleCacheEntry(
+        cache: this,
+        path: 'search/${safePath(query)}',
         name: null,
         isPersistent: false,
         maxAge: null,
@@ -60,7 +71,7 @@ class _Cache with LocalStoreCacheMixIn implements Cache {
   @override
   CacheEntry<String> likes(DateTime date, DateTime sortBy) => SimpleCacheEntry(
         cache: this,
-        path: 'likes/${keyDateConvertor(date)}',
+        path: 'likes/${safePath({keyDateConvertor(date)})}',
         name: '${keyDateConvertor(sortBy)}',
         isPersistent: false,
         maxAge: null,

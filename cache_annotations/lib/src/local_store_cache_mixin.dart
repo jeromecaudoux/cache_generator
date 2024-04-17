@@ -152,4 +152,12 @@ mixin LocalStoreCacheMixIn implements BaseCache {
     }
     return data?['cache'];
   }
+
+  String safePath(dynamic value) {
+    String name = value.toString();
+    if (name.isEmpty) {
+      return '_';
+    }
+    return name.replaceAll('/', '_');
+  }
 }

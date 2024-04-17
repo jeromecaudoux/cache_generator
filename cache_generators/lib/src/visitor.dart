@@ -57,7 +57,7 @@ class KeyMetadata {
   String formatPath() {
     String result = path;
     for (String key in keyParts.keys) {
-      result = result.replaceAll('{$key}', '\$${keyParts[key]}');
+      result = result.replaceAll('{$key}', '\${safePath(${keyParts[key]})}');
     }
     return result;
   }

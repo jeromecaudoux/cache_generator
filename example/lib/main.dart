@@ -78,6 +78,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
     await cache.friendById(12).set('joe');
     print(await cache.friendById(12).get());
+
+    await cache.search('').set('value with empty string ?');
+    print(await cache.search('').get());
   }
 
   Future<void> _testExpiration() async {
