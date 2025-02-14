@@ -79,7 +79,7 @@ class Visitor extends SimpleElementVisitor<void> {
   @override
   void visitMethodElement(MethodElement element) {
     String returnType =
-        element.returnType.getDisplayString(withNullability: true);
+        element.returnType.getDisplayString();
     RegExpMatch? match = _cacheEntryReturnRegExp.firstMatch(returnType);
     if (element.isAbstract && match != null) {
       methods.add(
@@ -113,7 +113,7 @@ class Visitor extends SimpleElementVisitor<void> {
       for (ElementAnnotation annotation in parameter.metadata) {
         DartObject obj = annotation.computeConstantValue()!;
         if (obj.type!
-            .getDisplayString(withNullability: true)
+            .getDisplayString()
             .startsWith('SortBy<')) {
           String? convert =
               obj.getField('convert')?.toFunctionValue()?.displayName;
@@ -165,7 +165,7 @@ class Visitor extends SimpleElementVisitor<void> {
       for (ElementAnnotation annotation in parameter.metadata) {
         DartObject obj = annotation.computeConstantValue()!;
         if (obj.type!
-            .getDisplayString(withNullability: true)
+            .getDisplayString()
             .startsWith('Path<')) {
           String name = obj.getField('name')!.toStringValue()!;
           String? convert =

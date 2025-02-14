@@ -14,9 +14,9 @@ mixin LocalStoreCacheMixIn implements BaseCache {
   String get name;
 
   @override
-  Future<void> deleteAll({bool deletePersistent = false}) {
+  Future<void> deleteAll({bool deletePersistent = false}) async {
     if (!deletePersistent) {
-      _db.collection(_notPersistentKey).delete();
+      return _db.collection(_notPersistentKey).delete();
     }
     return _local.delete();
   }

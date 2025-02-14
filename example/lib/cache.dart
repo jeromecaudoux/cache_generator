@@ -33,7 +33,7 @@ abstract class Cache implements BaseCache {
 }
 
 dynamic userToJson(User user) {
-  return User(user.name, 58).toJson();
+  return user.toJson();
 }
 
 String keyDateConvertor(DateTime date) {

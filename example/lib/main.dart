@@ -52,6 +52,10 @@ class _MyHomePageState extends State<MyHomePage> {
               child: const Text('Test expiration'),
             ),
             TextButton(
+              onPressed: _testDeletes,
+              child: const Text('Test delete'),
+            ),
+            TextButton(
               onPressed: () =>
                   Cache.instance.deleteAll().then((value) => print('deleted')),
               child: const Text('Delete all'),
@@ -70,10 +74,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _test() async {
     Cache cache = Cache.instance;
-    await cache.deviceId().set(['lol', 'ok']);
+    await cache.deviceId().set(['Hello', 'ok']);
     print(await cache.deviceId().get());
 
-    await cache.me().set(User('Someone', 26));
+    await cache.me().set(User('Someone', 27));
     print(await cache.me().get());
 
     await cache.friendById(12).set('joe');
@@ -95,5 +99,23 @@ class _MyHomePageState extends State<MyHomePage> {
         .then((value) => Future.delayed(const Duration(seconds: 3)))
         .then((value) => Cache.instance.friends().get())
         .then((value) => debugPrint('Value is: $value (should be 1)'));
+  }
+
+  Future<void> _testDeletes() async {
+    Cache cache = Cache.instance;
+    await cache.deleteAll();
+
+    await cache.deviceId().set(['Hello', 'ok']);
+    await cache.me().set(User('Someone', 26));
+    await cache.friendById(12).set('joe');
+
+    await cache.deleteAll();
+    assert(await cache.deviceId().get() != null);
+    assert(await cache.me().get() == null);
+    assert(await cache.friendById(12).get() == null);
+
+    await cache.deleteAll(deletePersistent: true);
+    assert(await cache.deviceId().get() == null);
+    print('good');
   }
 }

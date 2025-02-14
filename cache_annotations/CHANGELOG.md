@@ -1,3 +1,7 @@
+## 1.0.2
+
+* Fix cached values after calling deleteAll or delete
+
 ## 1.0.1
 
 * Add new parameter 'convert' to @Path or @SortBy to allow tomore customization of the path or sort by value
