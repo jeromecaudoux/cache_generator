@@ -36,23 +36,12 @@ class _Cache extends Cache with LocalStoreCacheMixIn {
       );
 
   @override
-  CacheEntry<int> friends() => SimpleCacheEntry(
-        cache: this,
-        path: 'friends',
-        name: null,
-        isPersistent: false,
-        maxAge: const Duration(microseconds: 2000000),
-        fromJson: (json) => json as int,
-        toJson: null,
-      );
-
-  @override
   CacheEntry<String> friendById(int userId) => SimpleCacheEntry(
         cache: this,
         path: 'friends/$userId',
         name: null,
         isPersistent: false,
-        maxAge: null,
+        maxAge: const Duration(microseconds: 2000000),
         fromJson: (json) => json as String,
         toJson: null,
       );

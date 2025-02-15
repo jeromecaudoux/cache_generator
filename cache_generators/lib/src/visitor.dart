@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/visitor.dart';
@@ -78,8 +80,7 @@ class Visitor extends SimpleElementVisitor<void> {
 
   @override
   void visitMethodElement(MethodElement element) {
-    String returnType =
-        element.returnType.getDisplayString();
+    String returnType = element.returnType.getDisplayString();
     RegExpMatch? match = _cacheEntryReturnRegExp.firstMatch(returnType);
     if (element.isAbstract && match != null) {
       methods.add(
@@ -112,9 +113,7 @@ class Visitor extends SimpleElementVisitor<void> {
       // Look for the key parts
       for (ElementAnnotation annotation in parameter.metadata) {
         DartObject obj = annotation.computeConstantValue()!;
-        if (obj.type!
-            .getDisplayString()
-            .startsWith('SortBy<')) {
+        if (obj.type!.getDisplayString().startsWith('SortBy<')) {
           String? convert =
               obj.getField('convert')?.toFunctionValue()?.displayName;
           String name = convert == null
@@ -144,7 +143,8 @@ class Visitor extends SimpleElementVisitor<void> {
   }
 
   KeyMetadata _getKeyOfMethod(MethodElement element) {
-    DartObject? cacheKey = _methodHasAnnotation(CacheKey, element);
+    DartObject? cacheKey = _methodHasAnnotation(Cached, element) ??
+        _methodHasAnnotation(CacheKey, element);
     String path = element.name;
     String? fromJson;
     String? toJson;
@@ -164,9 +164,7 @@ class Visitor extends SimpleElementVisitor<void> {
       // Look for the path parts
       for (ElementAnnotation annotation in parameter.metadata) {
         DartObject obj = annotation.computeConstantValue()!;
-        if (obj.type!
-            .getDisplayString()
-            .startsWith('Path<')) {
+        if (obj.type!.getDisplayString().startsWith('Path<')) {
           String name = obj.getField('name')!.toStringValue()!;
           String? convert =
               obj.getField('convert')?.toFunctionValue()?.displayName;
@@ -174,7 +172,7 @@ class Visitor extends SimpleElementVisitor<void> {
             throw Exception('The path part $name is already defined');
           }
           if (!path.contains('{$name}')) {
-            throw Exception('The path part $name is not defined in: $path');
+            throw Exception('The path part "$name" is not defined in: "$path"');
           }
           keyParts[name] = convert == null
               ? parameter.name

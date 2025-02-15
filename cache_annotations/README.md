@@ -4,13 +4,18 @@ to help you manage persistent cache.
 ## Usage
 
 Add the annotations and generators to your dependencies
+```shell
+flutter pub add cache_annotations
+flutter pub add dev:cache_generators 
+```
+Or add it manually to your pubspec.yaml
 ```yaml 
 dependencies:
-  cache_annotations: ^1.0.0
+  cache_annotations: ^1.0.3
 
 dev_dependencies:
-  build_runner: ^2.4.8
-  cache_generators: ^1.0.0
+  build_runner: ^2.4.15
+  cache_generators: ^1.0.3
 ```
 
 ## Define your cache
@@ -27,26 +32,21 @@ abstract class Cache implements BaseCache {
   static Cache get instance => _instance;
 
   @persistent
-  @CacheKey(path: 'device_id')
+  @Cached(path: 'device_id')
   CacheEntry<Iterable<String>> deviceId();
 
-  @CacheKey(fromJson: User.fromJson, toJson: userToJson)
+  @Cached(fromJson: User.fromJson, toJson: userToJson)
   CacheEntry<User> me();
 
   @MaxAge(Duration(seconds: 2))
-  @CacheKey(path: 'friends')
-  CacheEntry<int> friends();
-
-  @CacheKey(path: 'friends/{id}')
+  @Cached(path: 'friends/{id}')
   CacheEntry<String> friendById(
       @Path('id') int userId,
   );
 
-  @CacheKey(path: 'likes/{date}')
+  @Cached(path: 'likes/{date}')
   CacheEntry<String> likes(
       @Path('date', convert: keyDateConvertor) DateTime date,
-      @SortBy(convert: keyDateConvertor) DateTime sortBy,
-      @sortBy int test,
   );
 }
 ```
@@ -73,6 +73,12 @@ flutter pub run build_runner build
     
     await cache.friendById(12).set('Joe');
     print(await cache.friendById(12).get());
+    
+    # Delete all (except persistent)
+    await cache.deleteAll();
+    
+    # Delete all including persistent
+    await cache.deleteAll(deletePersistent: true);
 ```
 
 ## Additional information

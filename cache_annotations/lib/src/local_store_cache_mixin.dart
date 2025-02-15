@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:cache_annotations/src/base_cache.dart';
 import 'package:cache_annotations/src/cache_generator_annotations.dart';
+import 'package:cache_annotations/src/localstore/localstore.dart';
 import 'package:flutter/widgets.dart';
-import 'package:localstore/localstore.dart';
 import 'package:path_provider/path_provider.dart';
 
 mixin LocalStoreCacheMixIn implements BaseCache {

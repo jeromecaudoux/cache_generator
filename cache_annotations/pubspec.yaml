@@ -1,6 +1,6 @@
 name: cache_annotations
 description: "This package is a type conversion generator using source_gen and inspired by Retrofit to help you manage persistent cache."
-version: 1.0.2
+version: 1.0.3
 homepage: https://github.com/jeromecaudoux/cache_generator/
 publish_to: none
 
@@ -10,8 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  localstore:
-    path: ../localstore/
   path_provider: ^2.1.5
 
 dev_dependencies:
