@@ -4,12 +4,21 @@ class LocalStoreCache {
   const LocalStoreCache(this.name);
 }
 
+@Deprecated('Use @Cached instead')
 class CacheKey<T> {
   final String? path;
   final CacheFromJson<T>? fromJson;
   final CacheToJson<T>? toJson;
 
   const CacheKey({this.path, this.fromJson, this.toJson});
+}
+
+class Cached<T> {
+  final String? path;
+  final CacheFromJson<T>? fromJson;
+  final CacheToJson<T>? toJson;
+
+  const Cached({this.path, this.fromJson, this.toJson});
 }
 
 class Path<T, R> {
@@ -25,6 +34,7 @@ class MaxAge {
   const MaxAge(this.maxAge);
 }
 
+@Deprecated('Use path\'s field on @Cached annotation instead')
 class SortBy<T, R> {
   final PathConvertor<T, R>? convert;
 
@@ -35,6 +45,7 @@ class Persistent {
   const Persistent();
 }
 
+@Deprecated('Use path\'s field on @Cached annotation instead')
 const sortBy = SortBy();
 const persistent = Persistent();
 

@@ -17,4 +17,15 @@ class User {
   String toString() {
     return 'User{name: $name, age: $age}';
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is User &&
+          runtimeType == other.runtimeType &&
+          name == other.name &&
+          age == other.age;
+
+  @override
+  int get hashCode => name.hashCode ^ age.hashCode;
 }

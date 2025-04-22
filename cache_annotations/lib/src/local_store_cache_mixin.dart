@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:cache_annotations/src/base_cache.dart';
 import 'package:cache_annotations/src/cache_generator_annotations.dart';
+import 'package:cache_annotations/src/localstore/localstore.dart';
 import 'package:flutter/widgets.dart';
-import 'package:localstore/localstore.dart';
 import 'package:path_provider/path_provider.dart';
 
 mixin LocalStoreCacheMixIn implements BaseCache {
@@ -14,9 +14,9 @@ mixin LocalStoreCacheMixIn implements BaseCache {
   String get name;
 
   @override
-  Future<void> deleteAll({bool deletePersistent = false}) {
+  Future<void> deleteAll({bool deletePersistent = false}) async {
     if (!deletePersistent) {
-      _db.collection(_notPersistentKey).delete();
+      return _db.collection(_notPersistentKey).delete();
     }
     return _local.delete();
   }

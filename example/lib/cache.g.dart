@@ -51,7 +51,7 @@ class _Cache extends Cache with LocalStoreCacheMixIn {
   @override
   CacheEntry<int> friends() => SimpleCacheEntry(
         cache: this,
-        path: 'friends',
+        path: 'all-friends',
         name: null,
         isPersistent: false,
         maxAge: const Duration(microseconds: 2000000),
@@ -63,17 +63,6 @@ class _Cache extends Cache with LocalStoreCacheMixIn {
   CacheEntry<String> friendById(int userId) => SimpleCacheEntry(
         cache: this,
         path: 'friends/${safePath(userId)}',
-        name: null,
-        isPersistent: false,
-        maxAge: null,
-        fromJson: (json) => json as String,
-        toJson: null,
-      );
-
-  @override
-  CacheEntry<String> search(String? query) => SimpleCacheEntry(
-        cache: this,
-        path: 'search/${safePath(query)}',
         name: null,
         isPersistent: false,
         maxAge: null,
