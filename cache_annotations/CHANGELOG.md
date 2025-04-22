@@ -1,3 +1,7 @@
+## 1.0.5
+
+* Bump build_runner to 2.4.15
+
 ## 1.0.4
 
 * Fix deserialization of return type `List` (only `Iterable` was supported).
