@@ -67,7 +67,7 @@ void main() {
     expect(await cache.deviceId().get(), null);
   });
 
-  test('Test allFromCache', () async {
+  test('Test all', () async {
     Cache cache = Cache.instance;
     await cache.deleteAll();
 
@@ -78,7 +78,6 @@ void main() {
     final Iterable<String>? all = await cache.all(
       'friends',
       fromJson: (e) => e as String,
-      isPersistent: true,
     );
 
     expect(all?.length, 10);

@@ -7,6 +7,6 @@ import 'package:source_gen/source_gen.dart';
 Builder generateJsonMethods(BuilderOptions options) {
   return SharedPartBuilder(
     [LocalStoreCacheGenerator()],
-    'cache_generator',
+    'cache_generators',
   );
 }

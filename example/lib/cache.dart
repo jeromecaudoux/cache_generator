@@ -23,7 +23,6 @@ abstract class Cache implements BaseCache {
   @Cached(path: 'all-friends')
   CacheEntry<int> friends();
 
-  @persistent
   @Cached(path: 'friends/{id}')
   CacheEntry<String> friendById(
     @Path('id') int userId,

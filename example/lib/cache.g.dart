@@ -64,7 +64,7 @@ class _Cache extends Cache with LocalStoreCacheMixIn {
         cache: this,
         path: 'friends/${safePath(userId)}',
         name: null,
-        isPersistent: true,
+        isPersistent: false,
         maxAge: null,
         fromJson: (json) => json as String,
         toJson: null,

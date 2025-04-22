@@ -7,7 +7,7 @@ targets:
 builders:
   generators:
     target: ":cache_generators" # Generator name
-    import: "package:cache_generators/generators.dart"
+    import: "package:cache_generators/cache_generators.dart"
     builder_factories: ["generateJsonMethods"] # Builder name(BuilderOption) this is a definition
     build_extensions: { ".dart": [".g.part"] }
     auto_apply: dependents
