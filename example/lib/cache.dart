@@ -6,6 +6,7 @@ part 'cache.g.dart';
 @LocalStoreCache('my_local_store_cache')
 abstract class Cache implements BaseCache {
   static final Cache _instance = _Cache();
+
   static Cache get instance => _instance;
 
   @persistent
@@ -22,6 +23,7 @@ abstract class Cache implements BaseCache {
   @Cached(path: 'all-friends')
   CacheEntry<int> friends();
 
+  @persistent
   @Cached(path: 'friends/{id}')
   CacheEntry<String> friendById(
     @Path('id') int userId,

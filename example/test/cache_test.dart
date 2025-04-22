@@ -8,9 +8,14 @@
 import 'package:cache_generator_example/cache.dart';
 import 'package:cache_generator_example/user.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  setUp(() async {
+    PathProviderPlatform.instance = FakePathProviderPlatform();
+  });
 
   test('Test set and get', () async {
     Cache cache = Cache.instance;
@@ -61,4 +66,33 @@ void main() {
     await cache.deleteAll(deletePersistent: true);
     expect(await cache.deviceId().get(), null);
   });
+
+  test('Test allFromCache', () async {
+    Cache cache = Cache.instance;
+    await cache.deleteAll();
+
+    for (int i = 0; i < 10; i++) {
+      await cache.friendById(i).set('joe$i');
+    }
+
+    final Iterable<String>? all = await cache.all(
+      'friends',
+      fromJson: (e) => e as String,
+      isPersistent: true,
+    );
+
+    expect(all?.length, 10);
+    for (int i = 0; i < 10; i++) {
+      expect(all?.elementAt(i), 'joe$i');
+    }
+  });
+}
+
+class FakePathProviderPlatform extends Fake
+    with MockPlatformInterfaceMixin
+    implements PathProviderPlatform {
+  @override
+  Future<String?> getApplicationCachePath() async {
+    return './';
+  }
 }

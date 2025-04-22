@@ -1,32 +1,46 @@
 import 'dart:io';
 
-import 'package:cache_annotations/src/base_cache.dart';
-import 'package:cache_annotations/src/cache_generator_annotations.dart';
+import 'package:cache_annotations/annotations.dart';
 import 'package:cache_annotations/src/localstore/localstore.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
 mixin LocalStoreCacheMixIn implements BaseCache {
-  late final CollectionRef _local = Localstore.instance.collection('local');
-  late final DocumentRef _db = _local.doc(name);
+  CollectionRef? _local;
   final String _notPersistentKey = 'not_persistent';
 
   String get name;
 
   @override
-  Future<void> deleteAll({bool deletePersistent = false}) async {
-    if (!deletePersistent) {
-      return _db.collection(_notPersistentKey).delete();
+  Future<Directory> get directory async {
+    if (kIsWeb) {
+      return Directory('/');
     }
-    return _local.delete();
+    return getApplicationCacheDirectory();
+  }
+
+  Future<DocumentRef> get _ensureDb async {
+    _local ??= Localstore.getInstance(customPath: (await directory).path)
+        .collection('local');
+    return _local!.doc(name);
   }
 
   @override
+  Future<void> deleteAll({bool deletePersistent = false}) async {
+    DocumentRef db = await _ensureDb;
+    if (!deletePersistent) {
+      return db.collection(_notPersistentKey).delete();
+    }
+    return _local!.delete();
+  }
+
+  String get _separator => kIsWeb ? '/' : Platform.pathSeparator;
+
+  @override
   Future<int> cacheSize() async {
-    final docDir = await getApplicationDocumentsDirectory();
-    final String separator = Platform.pathSeparator;
+    final Directory docDir = await directory;
     String path =
-        '${docDir.path}${_db.path}.collection$separator$_notPersistentKey';
+        '${docDir.path}${(await _ensureDb).path}.collection$_separator$_notPersistentKey';
     return _directorySize(path);
   }
 
@@ -53,25 +67,63 @@ mixin LocalStoreCacheMixIn implements BaseCache {
     String path,
     String? name, {
     bool isPersistent = false,
-  }) {
-    return _documentRef(path, name, isPersistent: isPersistent).delete();
+  }) async {
+    return (await _documentRef(path, name, isPersistent: isPersistent))
+        .delete();
   }
 
   // Future<void> deleteDoc(String path, {bool isPersistent = false}) =>
   //     _db.collection(_getCollection(path, isPersistent: isPersistent)).delete();
 
-  DocumentRef _documentRef(
+  @override
+  Future<Iterable<T>?> all<T>(
+    String path, {
+    bool isPersistent = false,
+    required CacheFromJson<T> fromJson,
+    Duration? maxAge,
+  }) async {
+    final CollectionRef ref =
+        await _collectionRef(path, isPersistent: isPersistent);
+    try {
+      return ref.get().then(
+        (items) {
+          return items?.entries.map((pair) {
+            final tag = pair.key.split('/').last;
+            final dynamic data = _unzip(tag, pair.value, maxAge);
+            if (data == null) {
+              return null;
+            }
+            return fromJson(data);
+          }).whereType();
+        },
+      );
+    } catch (e, s) {
+      await ref.delete();
+      debugPrint('Failed to parse cached data: $e $s');
+    }
+    return null;
+  }
+
+  Future<CollectionRef> _collectionRef(
+    String path, {
+    required bool isPersistent,
+  }) async {
+    String prefix = isPersistent ? '' : '$_notPersistentKey$_separator';
+    DocumentRef db = await _ensureDb;
+    return db.collection('$prefix${_separator}values$_separator$path');
+  }
+
+  Future<DocumentRef> _documentRef(
     String path,
     String? name, {
     required bool isPersistent,
-  }) {
-    final String separator = Platform.pathSeparator;
-    String prefix = isPersistent ? '' : '$_notPersistentKey$separator';
+  }) async {
+    String prefix = isPersistent ? '' : '$_notPersistentKey$_separator';
+    DocumentRef db = await _ensureDb;
     if (name?.isNotEmpty == true) {
-      return _db.collection('$prefix$path').doc(name!);
-    } else {
-      return _db.collection('${prefix}values').doc(path);
+      return db.collection('$prefix$path').doc(name!);
     }
+    return db.collection('${prefix}values').doc(path);
   }
 
   Future<T> set<T>(
@@ -81,10 +133,11 @@ mixin LocalStoreCacheMixIn implements BaseCache {
     CacheToJson<T>? toJson,
     Duration? maxAge,
     bool isPersistent = false,
-  }) =>
-      _documentRef(path, name, isPersistent: isPersistent)
-          .set(_zip(item, maxAge, toJson))
-          .then((value) => item);
+  }) async {
+    return (await _documentRef(path, name, isPersistent: isPersistent))
+        .set(_zip(item, maxAge, toJson))
+        .then((value) => item);
+  }
 
   Future<T?> get<T>(
     String path,
@@ -94,7 +147,7 @@ mixin LocalStoreCacheMixIn implements BaseCache {
     bool isPersistent = false,
   }) async {
     final DocumentRef ref =
-        _documentRef(path, name, isPersistent: isPersistent);
+        await _documentRef(path, name, isPersistent: isPersistent);
     final value = await ref.get();
     final dynamic data = _unzip('$path/$name', value, maxAge);
     if (data == null) {
@@ -161,6 +214,6 @@ mixin LocalStoreCacheMixIn implements BaseCache {
     if (name.isEmpty) {
       return '_';
     }
-    return name.replaceAll('/', '_');
+    return name.replaceAll(_separator, '_');
   }
 }

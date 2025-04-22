@@ -1,6 +1,6 @@
 import 'package:analyzer/dart/element/element.dart';
-import 'package:cache_annotations/generators.dart';
 import 'package:build/build.dart';
+import 'package:cache_annotations/generators.dart';
 import 'package:cache_generators/src/visitor.dart';
 import 'package:source_gen/source_gen.dart';
 
@@ -85,7 +85,6 @@ class LocalStoreCacheGenerator extends GeneratorForAnnotation<LocalStoreCache> {
         .firstMatch(returnType)
         ?.namedGroup('type')
         ?.replaceAll('?', '');
-    print('-> $type <- $returnType');
     if (type != null) {
       if (_isPrimitive(type)) {
         return '(json) => (json as List).map((e) => e as $type).toList()';

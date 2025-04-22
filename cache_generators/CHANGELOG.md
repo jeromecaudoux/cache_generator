@@ -2,6 +2,7 @@
 
 * Fix deserialization of return type `List` (only `Iterable` was supported).
 * Add support to `Windows` platform.
+* Add new method `all` to get all elements in a specific path.
 
 ## 1.0.3
 

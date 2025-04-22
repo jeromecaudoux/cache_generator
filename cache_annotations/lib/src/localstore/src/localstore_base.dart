@@ -36,7 +36,7 @@ class Localstore implements LocalstoreImpl {
     assert(!(useSupportDir && (customPath != null && customPath.isNotEmpty)),
         "When useSupportDir is true, customPath must be null or empty.");
 
-    if ((customPath == null || customPath.isNotEmpty) && !useSupportDir) {
+    if ((customPath == null || customPath.isEmpty) && !useSupportDir) {
       return _localstore;
     } else if (customPath != null) {
       _localstore._utils.setCustomSavePath(customPath);
