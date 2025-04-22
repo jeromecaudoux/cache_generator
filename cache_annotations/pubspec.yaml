@@ -1,6 +1,6 @@
 name: cache_annotations
 description: "This package is a type conversion generator using source_gen and inspired by Retrofit to help you manage persistent cache."
-version: 1.0.2
+version: 1.0.4
 homepage: https://github.com/jeromecaudoux/cache_generator/
 
 environment:

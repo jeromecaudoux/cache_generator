@@ -15,6 +15,9 @@ abstract class Cache implements BaseCache {
   @CacheKey(fromJson: User.fromJson, toJson: userToJson)
   CacheEntry<User> me();
 
+  @CacheKey(path: 'users')
+  CacheEntry<List<User>> users();
+
   @MaxAge(Duration(seconds: 2))
   @CacheKey(path: 'friends')
   CacheEntry<int> friends();
@@ -32,8 +35,6 @@ abstract class Cache implements BaseCache {
   @CacheKey(path: 'likes/{date}')
   CacheEntry<String> likes(
     @Path('date', convert: keyDateConvertor) DateTime date,
-    @SortBy(convert: keyDateConvertor) DateTime sortBy,
-    // @SortBy() int test,
   );
 }
 

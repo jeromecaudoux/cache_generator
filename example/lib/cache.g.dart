@@ -36,6 +36,19 @@ class _Cache extends Cache with LocalStoreCacheMixIn {
       );
 
   @override
+  CacheEntry<List<User>> users() => SimpleCacheEntry(
+        cache: this,
+        path: 'users',
+        name: null,
+        isPersistent: false,
+        maxAge: null,
+        fromJson: (json) => (json as List)
+            .map((e) => User.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        toJson: null,
+      );
+
+  @override
   CacheEntry<int> friends() => SimpleCacheEntry(
         cache: this,
         path: 'friends',
@@ -69,10 +82,10 @@ class _Cache extends Cache with LocalStoreCacheMixIn {
       );
 
   @override
-  CacheEntry<String> likes(DateTime date, DateTime sortBy) => SimpleCacheEntry(
+  CacheEntry<String> likes(DateTime date) => SimpleCacheEntry(
         cache: this,
         path: 'likes/${safePath({keyDateConvertor(date)})}',
-        name: '${keyDateConvertor(sortBy)}',
+        name: null,
         isPersistent: false,
         maxAge: null,
         fromJson: (json) => json as String,

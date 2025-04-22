@@ -4,7 +4,7 @@ import 'package:build/build.dart';
 import 'package:cache_generators/src/visitor.dart';
 import 'package:source_gen/source_gen.dart';
 
-RegExp _iterableTypeRegExp = RegExp(r'^Iterable<(?<type>[a-zA-Z<>]+)>$');
+RegExp _iterableTypeRegExp = RegExp(r'^(Iterable|List)<(?<type>[a-zA-Z<>]+)>$');
 
 class LocalStoreCacheGenerator extends GeneratorForAnnotation<LocalStoreCache> {
   @override
@@ -85,11 +85,12 @@ class LocalStoreCacheGenerator extends GeneratorForAnnotation<LocalStoreCache> {
         .firstMatch(returnType)
         ?.namedGroup('type')
         ?.replaceAll('?', '');
+    print('-> $type <- $returnType');
     if (type != null) {
       if (_isPrimitive(type)) {
         return '(json) => (json as List).map((e) => e as $type).toList()';
       }
-      return '(json) => (json as List).map($type.fromJson).toList()';
+      return '(json) => (json as List).map((e) => $type.fromJson(e as Map<String, dynamic>)).toList()';
     }
     String safeReturnType = returnType.replaceAll('?', '');
     if (_isPrimitive(safeReturnType)) {
