@@ -1,6 +1,17 @@
+## 1.0.4
+
+* Fix deserialization of return type `List` (only `Iterable` was supported).
+* Add support to `Windows` platform.
+
+## 1.0.3
+
+* `@CachedKey` is now deprecated, use `@Cahed` instead
+* `@SortBy` is now deprecated, use the path's field on `@Cached` instead
+
 ## 1.0.2
 
 * Fix issue with `@Path` when an empty string is passed as a value
+* Fix cached values after calling deleteAll or delete
 
 ## 1.0.1
 

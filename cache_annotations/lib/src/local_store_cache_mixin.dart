@@ -24,7 +24,9 @@ mixin LocalStoreCacheMixIn implements BaseCache {
   @override
   Future<int> cacheSize() async {
     final docDir = await getApplicationDocumentsDirectory();
-    String path = '${docDir.path}${_db.path}.collection/$_notPersistentKey';
+    final String separator = Platform.pathSeparator;
+    String path =
+        '${docDir.path}${_db.path}.collection$separator$_notPersistentKey';
     return _directorySize(path);
   }
 
@@ -63,7 +65,8 @@ mixin LocalStoreCacheMixIn implements BaseCache {
     String? name, {
     required bool isPersistent,
   }) {
-    String prefix = isPersistent ? '' : '$_notPersistentKey/';
+    final String separator = Platform.pathSeparator;
+    String prefix = isPersistent ? '' : '$_notPersistentKey$separator';
     if (name?.isNotEmpty == true) {
       return _db.collection('$prefix$path').doc(name!);
     } else {
