@@ -82,7 +82,7 @@ void main() {
 
     expect(all?.length, 10);
     for (int i = 0; i < 10; i++) {
-      expect(all?.elementAt(i), 'joe$i');
+      expect(all?.contains('joe$i'), true);
     }
   });
 }

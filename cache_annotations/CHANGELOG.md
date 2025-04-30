@@ -1,3 +1,7 @@
+## 1.0.6
+
+* Bump dependencies
+
 ## 1.0.5
 
 * Bump build_runner to 2.4.15
