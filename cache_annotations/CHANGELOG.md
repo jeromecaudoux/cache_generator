@@ -1,6 +1,6 @@
-## 1.0.6
+## 1.0.7
 
-* Bump dependencies
+* Downgrade some dependencies to avoid conflicts
 
 ## 1.0.5
 
