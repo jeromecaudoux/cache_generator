@@ -1,8 +1,6 @@
 import 'dart:io';
 
 import 'package:cache_annotations/annotations.dart';
-import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart';
 
 abstract class BaseCache {
   Future<Directory> get directory;
