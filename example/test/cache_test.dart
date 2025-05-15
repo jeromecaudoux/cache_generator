@@ -67,7 +67,7 @@ void main() {
     expect(await cache.deviceId().get(), null);
   });
 
-  test('Test all', () async {
+  test('Test get all', () async {
     Cache cache = Cache.instance;
     await cache.deleteAll();
 
@@ -85,6 +85,23 @@ void main() {
       expect(all?.contains('joe$i'), true);
     }
   });
+
+  test('Test delete collection', () async {
+    Cache cache = Cache.instance;
+    await cache.deleteAll();
+
+    for (int i = 0; i < 10; i++) {
+      await cache.friendById(i).set('joe$i');
+    }
+
+    await cache.deleteCollection('friends');
+    final Iterable<String>? all = await cache.all(
+      'friends',
+      fromJson: (e) => e as String,
+    );
+
+    expect(all, null);
+  });
 }
 
 class FakePathProviderPlatform extends Fake
@@ -92,6 +109,11 @@ class FakePathProviderPlatform extends Fake
     implements PathProviderPlatform {
   @override
   Future<String?> getApplicationCachePath() async {
+    return './';
+  }
+
+  @override
+  Future<String?> getApplicationDocumentsPath() async {
     return './';
   }
 }

@@ -11,11 +11,11 @@ flutter pub add dev:cache_generators
 Or add it manually to your pubspec.yaml
 ```yaml 
 dependencies:
-  cache_annotations: ^1.0.3
+  cache_annotations: ^1.0.9
 
 dev_dependencies:
   build_runner: ^2.4.15
-  cache_generators: ^1.0.3
+  cache_generators: ^1.0.9
 ```
 
 ## Define your cache
@@ -67,13 +67,22 @@ flutter pub run build_runner build
     Cache cache = Cache.instance;
     await cache.deviceId().set(['dummy', 'ok']);
     print(await cache.deviceId().get());
-    
+
     await cache.me().set(User('Someone', 26));
     print(await cache.me().get());
-    
+
     await cache.friendById(12).set('Joe');
     print(await cache.friendById(12).get());
-    
+
+    # Get all documents in a specific collection
+    final Iterable<String>? all = await cache.all(
+        'friends',
+        fromJson: (e) => e as String,
+    );
+
+    # Delete a specific collection. Also support isPersistent parameter
+    await cache.deleteCollection('friends');
+
     # Delete all (except persistent)
     await cache.deleteAll();
     

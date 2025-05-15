@@ -111,14 +111,14 @@ packages:
       path: "../cache_annotations"
       relative: true
     source: path
-    version: "1.0.7"
+    version: "1.0.9"
   cache_generators:
     dependency: "direct dev"
     description:
       path: "../cache_generators"
       relative: true
     source: path
-    version: "1.0.7"
+    version: "1.0.9"
   characters:
     dependency: transitive
     description:

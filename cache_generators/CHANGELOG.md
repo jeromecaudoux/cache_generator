@@ -1,4 +1,9 @@
-## 1.0.8
+## 1.0.9
+
+* Add new method `deleteCollection` to delete all elements in a specific path.
+* Fix unit tests
+
+* ## 1.0.8
 
 * Fix issue with `directory` not being used correctly
 

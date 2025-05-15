@@ -104,6 +104,15 @@ mixin LocalStoreCacheMixIn implements BaseCache {
     return null;
   }
 
+  Future<void> deleteCollection(
+    String path, {
+    bool isPersistent = false,
+  }) async {
+    final CollectionRef ref =
+        await _collectionRef(path, isPersistent: isPersistent);
+    return ref.delete();
+  }
+
   Future<CollectionRef> _collectionRef(
     String path, {
     required bool isPersistent,
