@@ -1,13 +1,19 @@
+import 'dart:io';
+
 import 'package:cache_annotations/annotations.dart';
 import 'package:cache_generator_example/user.dart';
+import 'package:path_provider/path_provider.dart';
 
 part 'cache.g.dart';
 
 @LocalStoreCache('my_local_store_cache')
-abstract class Cache implements BaseCache {
+abstract class Cache with LocalStoreCacheMixIn {
   static final Cache _instance = _Cache();
 
   static Cache get instance => _instance;
+
+  @override
+  Future<Directory> get directory => getApplicationDocumentsDirectory();
 
   @persistent
   @Cached(path: 'device_id')

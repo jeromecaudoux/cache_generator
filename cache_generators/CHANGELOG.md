@@ -1,3 +1,7 @@
+## 1.0.8
+
+* Fix issue with `directory` not being used correctly
+
 ## 1.0.7
 
 * Downgrade some dependencies to avoid conflicts

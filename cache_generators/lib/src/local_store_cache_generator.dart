@@ -36,7 +36,7 @@ class LocalStoreCacheGenerator extends GeneratorForAnnotation<LocalStoreCache> {
       '// ignore_for_file: unnecessary_string_interpolations',
     );
     buffer.writeln(
-      'class _$className extends $className with LocalStoreCacheMixIn {',
+      'class _$className extends $className {',
     );
     buffer.writeln('_$className();');
 

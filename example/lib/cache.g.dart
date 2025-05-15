@@ -7,7 +7,7 @@ part of 'cache.dart';
 // **************************************************************************
 
 // ignore_for_file: unnecessary_string_interpolations
-class _Cache extends Cache with LocalStoreCacheMixIn {
+class _Cache extends Cache {
   _Cache();
 
   @override
