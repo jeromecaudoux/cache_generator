@@ -27,7 +27,7 @@ import 'package:cache_generator_example/user.dart';
 part 'cache.g.dart';
 
 @LocalStoreCache('my_local_store_cache')
-abstract class Cache implements BaseCache {
+abstract class Cache with LocalStoreCacheMixIn {
   static final Cache _instance = _Cache();
   static Cache get instance => _instance;
 
