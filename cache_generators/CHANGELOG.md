@@ -1,3 +1,7 @@
+## 1.0.10
+
+* Add new method `SerializationAdapter get adapter` to allow custom serialization of the cache.
+
 ## 1.0.9
 
 * Add new method `deleteCollection` to delete all elements in a specific path.

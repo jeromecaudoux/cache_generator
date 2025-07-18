@@ -3,17 +3,24 @@ import 'dart:convert';
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
 
+import 'package:cache_annotations/src/serialization_adapter.dart';
+
 import 'utils_impl.dart';
 
 /// Utils class
 class Utils implements UtilsImpl {
   Utils._();
+
   static final Utils _utils = Utils._();
   static Utils get instance => _utils;
 
   @override
-  Future<Map<String, dynamic>?> get(String path,
-      [bool? isCollection = false, List<List>? conditions]) async {
+  Future<Map<String, dynamic>?> get(
+    String path,
+    SerializationAdapter adapter, [
+    bool? isCollection = false,
+    List<List>? conditions,
+  ]) async {
     // Fetch the documents for this collection
     if (isCollection != null && isCollection == true) {
       var dataCol = html.window.localStorage.entries.singleWhere(
@@ -22,9 +29,9 @@ class Utils implements UtilsImpl {
       );
       if (dataCol.key != '') {
         if (conditions != null && conditions.first.isNotEmpty) {
-          return _getAll(dataCol);
+          return _getAll(dataCol, adapter);
         } else {
-          return _getAll(dataCol);
+          return _getAll(dataCol, adapter);
         }
       }
     } else {
@@ -39,8 +46,12 @@ class Utils implements UtilsImpl {
   }
 
   @override
-  Future<dynamic>? set(Map<String, dynamic> data, String path) {
-    return _writeToStorage(data, path);
+  Future<dynamic>? set(
+    Map<String, dynamic> data,
+    String path,
+    SerializationAdapter adapter,
+  ) {
+    return _writeToStorage(data, path, adapter);
   }
 
   @override
@@ -49,7 +60,11 @@ class Utils implements UtilsImpl {
   }
 
   @override
-  Stream<Map<String, dynamic>> stream(String path, [List<List>? conditions]) {
+  Stream<Map<String, dynamic>> stream(
+    String path,
+    SerializationAdapter adapter, [
+    List<List>? conditions,
+  ]) {
     // ignore: close_sinks
     final storage = _storageCache[path] ??
         _storageCache.putIfAbsent(
@@ -59,10 +74,13 @@ class Utils implements UtilsImpl {
     return storage.stream;
   }
 
-  Map<String, dynamic>? _getAll(MapEntry<String, String> dataCol) {
+  Map<String, dynamic>? _getAll(
+    MapEntry<String, String> dataCol,
+    SerializationAdapter adapter,
+  ) {
     final items = <String, dynamic>{};
     try {
-      final mapCol = json.decode(dataCol.value) as Map<String, dynamic>;
+      final mapCol = adapter.deserialize(utf8.encode(dataCol.value));
       mapCol.forEach((key, value) {
         final data = value as Map<String, dynamic>;
         items[key] = data;
@@ -111,11 +129,13 @@ class Utils implements UtilsImpl {
   }
 
   Future<dynamic> _writeToStorage(
-    Map<String, dynamic> data,
+    Map<String, dynamic> mapData,
     String path,
+    SerializationAdapter adapter,
   ) async {
     final key = path.replaceAll(RegExp(r'[^\/]+\/?$'), '');
 
+    final data = adapter.serialize(mapData);
     final uri = Uri.parse(path);
     final id = uri.pathSegments.last;
     var dataCol = html.window.localStorage.entries.singleWhere(
@@ -144,7 +164,7 @@ class Utils implements UtilsImpl {
           _storageCache.putIfAbsent(
               key, () => StreamController<Map<String, dynamic>>.broadcast());
 
-      storage.sink.add(data);
+      storage.sink.add(mapData);
     } catch (error) {
       rethrow;
     }

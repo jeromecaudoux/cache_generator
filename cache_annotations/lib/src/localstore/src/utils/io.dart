@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
+import 'package:cache_annotations/src/serialization_adapter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -52,8 +52,12 @@ class Utils implements UtilsImpl {
   }
 
   @override
-  Future<Map<String, dynamic>?> get(String path,
-      [bool? isCollection = false, List<List>? conditions]) async {
+  Future<Map<String, dynamic>?> get(
+    String path,
+    SerializationAdapter adapter, [
+    bool? isCollection = false,
+    List<List>? conditions,
+  ]) async {
     // Fetch the documents for this collection
     path = _cleanPath(path);
     if (isCollection != null && isCollection == true) {
@@ -65,7 +69,7 @@ class Utils implements UtilsImpl {
       List<FileSystemEntity> entries =
           dir.listSync(recursive: false).whereType<File>().toList();
       if (conditions != null && conditions.first.isNotEmpty) {
-        return await _getAll(entries);
+        return await _getAll(entries, adapter);
         /*
         // With conditions
         entries.forEach((e) async {
@@ -80,7 +84,7 @@ class Utils implements UtilsImpl {
         return _data;
         */
       } else {
-        return await _getAll(entries);
+        return await _getAll(entries, adapter);
       }
     } else {
       // Reads the document referenced by this [DocumentRef].
@@ -89,12 +93,15 @@ class Utils implements UtilsImpl {
         return null;
       }
       final randomAccessFile = file.openSync(mode: FileMode.append);
-      final data = await _readFile(randomAccessFile);
+      final data = await _readFile(randomAccessFile, adapter);
       randomAccessFile.closeSync();
       if (data is Map<String, dynamic>) {
         final key = path.replaceAll(lastPathComponentRegEx, '');
         // ignore: close_sinks
-        final storage = _storageCache.putIfAbsent(key, () => _newStream(key));
+        final storage = _storageCache.putIfAbsent(
+          key,
+          () => _newStream(key, adapter),
+        );
         storage.add(data);
         return data;
       }
@@ -103,8 +110,12 @@ class Utils implements UtilsImpl {
   }
 
   @override
-  Future<dynamic>? set(Map<String, dynamic> data, String path) {
-    return _writeFile(data, path);
+  Future<dynamic>? set(
+    Map<String, dynamic> data,
+    String path,
+    SerializationAdapter adapter,
+  ) {
+    return _writeFile(data, path, adapter);
   }
 
   @override
@@ -118,18 +129,28 @@ class Utils implements UtilsImpl {
   }
 
   @override
-  Stream<Map<String, dynamic>> stream(String path, [List<List>? conditions]) {
+  Stream<Map<String, dynamic>> stream(
+    String path,
+    SerializationAdapter adapter, [
+    List<List>? conditions,
+  ]) {
     // ignore: close_sinks
     var storage = _storageCache[path];
     if (storage == null) {
-      storage = _storageCache.putIfAbsent(path, () => _newStream(path));
+      storage = _storageCache.putIfAbsent(
+        path,
+        () => _newStream(path, adapter),
+      );
     } else {
-      _initStream(storage, path);
+      _initStream(storage, path, adapter);
     }
     return storage.stream;
   }
 
-  Future<Map<String, dynamic>?> _getAll(List<FileSystemEntity> entries) async {
+  Future<Map<String, dynamic>?> _getAll(
+    List<FileSystemEntity> entries,
+    SerializationAdapter adapter,
+  ) async {
     final items = <String, dynamic>{};
     final dbPath = await getDatabasePath();
     final fullPath = _customSavePath ?? dbPath;
@@ -141,7 +162,7 @@ class Utils implements UtilsImpl {
         return;
       }
       final randomAccessFile = await file.open(mode: FileMode.append);
-      final data = await _readFile(randomAccessFile);
+      final data = await _readFile(randomAccessFile, adapter);
       await randomAccessFile.close();
 
       if (data is Map<String, dynamic>) {
@@ -154,10 +175,13 @@ class Utils implements UtilsImpl {
   }
 
   /// Streams all file in the path
-  StreamController<Map<String, dynamic>> _newStream(String path) {
+  StreamController<Map<String, dynamic>> _newStream(
+    String path,
+    SerializationAdapter adapter,
+  ) {
     path = _cleanPath(path);
     final storage = StreamController<Map<String, dynamic>>.broadcast();
-    _initStream(storage, path);
+    _initStream(storage, path, adapter);
 
     return storage;
   }
@@ -165,6 +189,7 @@ class Utils implements UtilsImpl {
   Future _initStream(
     StreamController<Map<String, dynamic>> storage,
     String path,
+    SerializationAdapter adapter,
   ) async {
     path = _cleanPath(path);
     final fullPath = _customSavePath ?? await getDatabasePath();
@@ -179,7 +204,7 @@ class Utils implements UtilsImpl {
           continue;
         }
         final randomAccessFile = file.openSync(mode: FileMode.append);
-        _readFile(randomAccessFile).then((data) {
+        _readFile(randomAccessFile, adapter).then((data) {
           randomAccessFile.closeSync();
           if (data is Map<String, dynamic>) {
             storage.add(data);
@@ -195,16 +220,21 @@ class Utils implements UtilsImpl {
       .replaceAll('/', _separator)
       .replaceAll('$_separator$_separator', _separator);
 
-  Future<dynamic> _readFile(RandomAccessFile file) async {
+  Future<dynamic> _readFile(
+    RandomAccessFile file,
+    SerializationAdapter adapter,
+  ) async {
     final length = file.lengthSync();
     file.setPositionSync(0);
     final buffer = Uint8List(length);
     file.readIntoSync(buffer);
     try {
-      final contentText = utf8.decode(buffer);
-      final data = json.decode(contentText) as Map<String, dynamic>;
+      final data = adapter.deserialize(buffer);
       return data;
     } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Error reading file: $e');
+      }
       return e;
     }
   }
@@ -233,10 +263,13 @@ class Utils implements UtilsImpl {
 
   String get _separator => kIsWeb ? '/' : Platform.pathSeparator;
 
-  Future _writeFile(Map<String, dynamic> data, String path) async {
+  Future _writeFile(
+    Map<String, dynamic> data,
+    String path,
+    SerializationAdapter adapter,
+  ) async {
     path = _cleanPath(path);
-    final serialized = json.encode(data);
-    final buffer = utf8.encode(serialized);
+    final buffer = adapter.serialize(data);
     final file = await _getFile(path, true);
     final randomAccessFile = file!.openSync(mode: FileMode.append);
 
@@ -249,7 +282,10 @@ class Utils implements UtilsImpl {
 
     final key = path.replaceAll(lastPathComponentRegEx, '');
     // ignore: close_sinks
-    final storage = _storageCache.putIfAbsent(key, () => _newStream(key));
+    final storage = _storageCache.putIfAbsent(
+      key,
+      () => _newStream(key, adapter),
+    );
     storage.add(data);
   }
 

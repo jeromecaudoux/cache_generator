@@ -11,10 +11,10 @@ abstract class CollectionRefImpl {
   DocumentRef doc([String? id]);
 
   /// Notifies of query results at this collection.
-  Stream<Map<String, dynamic>> get stream;
+  Stream<Map<String, dynamic>> stream(SerializationAdapter adapter);
 
   /// Fetch the documents for this collection
-  Future<Map<String, dynamic>?> get();
+  Future<Map<String, dynamic>?> get(SerializationAdapter adapter);
 
   /// Creates and returns a new [CollectionRef] with additional filter on
   /// specified [field]. [field] refers to a field in a document.
@@ -28,5 +28,5 @@ abstract class CollectionRefImpl {
   /// Delete collection
   ///
   /// All collections and documents in this collection will be deleted.
-  Future<void> delete();
+  Future<void> delete(SerializationAdapter adapter);
 }

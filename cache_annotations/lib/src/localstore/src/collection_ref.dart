@@ -25,6 +25,7 @@ class CollectionRef implements CollectionRefImpl {
   CollectionRef._(this._id, [this._parent, this._delegate, this._conditions]) {
     _path = _buildPath(_parent?.path, _id, _delegate?.id);
   }
+
   static final _cache = <String, CollectionRef>{};
 
   /// Returns an instance using the default [CollectionRef].
@@ -51,11 +52,12 @@ class CollectionRef implements CollectionRefImpl {
   final _utils = Utils.instance;
 
   @override
-  Stream<Map<String, dynamic>> get stream => _utils.stream(path, _conditions);
+  Stream<Map<String, dynamic>> stream(SerializationAdapter adapter) =>
+      _utils.stream(path, adapter, _conditions);
 
   @override
-  Future<Map<String, dynamic>?> get() async {
-    return await _utils.get(path, true, _conditions);
+  Future<Map<String, dynamic>?> get(SerializationAdapter adapter) async {
+    return await _utils.get(path, adapter, true, _conditions);
   }
 
   @override
@@ -87,11 +89,11 @@ class CollectionRef implements CollectionRefImpl {
   }
 
   @override
-  Future<void> delete() async {
+  Future<void> delete(SerializationAdapter adapter) async {
     _cache.removeWhere((key, value) => key.startsWith(path));
     DocumentRef.clearCache(path);
 
-    final docs = await _utils.get(path, true, _conditions);
+    final docs = await _utils.get(path, adapter, true, _conditions);
 
     if (docs != null) {
       for (var key in docs.keys) {

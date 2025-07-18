@@ -37,7 +37,11 @@ class DocumentRef implements DocumentRefImpl {
   final Map<String, dynamic> _data = {};
 
   @override
-  Future<dynamic> set(Map<String, dynamic> data, [SetOptions? options]) async {
+  Future<dynamic> set(
+    Map<String, dynamic> data,
+    SerializationAdapter adapter, [
+    SetOptions? options,
+  ]) async {
     options ??= SetOptions();
     if (options.merge) {
       final output = Map<String, dynamic>.from(data);
@@ -49,14 +53,13 @@ class DocumentRef implements DocumentRefImpl {
     } else {
       _data[id] = data;
     }
-    _utils.set(_data[id], path);
+    _utils.set(_data[id], path, adapter);
   }
 
   @override
-  Future<Map<String, dynamic>?> get() async {
-    return _data[id] ?? await _utils.get(path);
+  Future<Map<String, dynamic>?> get(SerializationAdapter adapter) async {
+    return _data[id] ?? await _utils.get(path, adapter);
   }
-
 
   @override
   Future delete() async {

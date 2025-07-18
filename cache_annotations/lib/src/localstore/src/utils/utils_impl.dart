@@ -6,6 +6,8 @@
 //   Stream<Map<String, dynamic>> stream(String path, [List<List>? conditions]);
 // }
 
+import 'package:cache_annotations/annotations.dart';
+
 abstract class UtilsImpl {
   /// Retrieves data from the file at the specified path.
   ///
@@ -14,14 +16,22 @@ abstract class UtilsImpl {
   ///
   /// If [_customSavePath] is specified, the data will be retrieved from the file
   /// at the custom save path instead of the default save path.
-  Future<Map<String, dynamic>?> get(String path,
-      [bool? isCollection = false, List<List>? conditions]);
+  Future<Map<String, dynamic>?> get(
+    String path,
+    SerializationAdapter adapter, [
+    bool? isCollection = false,
+    List<List>? conditions,
+  ]);
 
   /// Writes data to the file at the specified path.
   ///
   /// If [_customSavePath] is specified, the data will be written to the file
   /// at the custom save path instead of the default save path.
-  Future<dynamic>? set(Map<String, dynamic> data, String path);
+  Future<dynamic>? set(
+    Map<String, dynamic> data,
+    String path,
+    SerializationAdapter adapter,
+  );
 
   /// Deletes the file at the specified path.
   ///
@@ -36,7 +46,11 @@ abstract class UtilsImpl {
   ///
   /// If [_customSavePath] is specified, the stream will watch for changes in the
   /// file at the custom save path instead of the default save path.
-  Stream<Map<String, dynamic>> stream(String path, [List<List>? conditions]);
+  Stream<Map<String, dynamic>> stream(
+    String path,
+    SerializationAdapter adapter, [
+    List<List>? conditions,
+  ]);
 
   /// Sets the custom save path for the Utils instance.
   ///

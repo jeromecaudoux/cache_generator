@@ -19,6 +19,11 @@ mixin LocalStoreCacheMixIn implements BaseCache {
     return getApplicationCacheDirectory();
   }
 
+  @override
+  SerializationAdapter get adapter {
+    return JsonSerializationAdapter();
+  }
+
   Future<DocumentRef> get _ensureDb async {
     _local ??= Localstore.getInstance(customPath: (await directory).path)
         .collection('local');
@@ -29,9 +34,9 @@ mixin LocalStoreCacheMixIn implements BaseCache {
   Future<void> deleteAll({bool deletePersistent = false}) async {
     DocumentRef db = await _ensureDb;
     if (!deletePersistent) {
-      return db.collection(_notPersistentKey).delete();
+      return db.collection(_notPersistentKey).delete(adapter);
     }
-    return _local!.delete();
+    return _local!.delete(adapter);
   }
 
   String get _separator => kIsWeb ? '/' : Platform.pathSeparator;
@@ -85,7 +90,7 @@ mixin LocalStoreCacheMixIn implements BaseCache {
     final CollectionRef ref =
         await _collectionRef(path, isPersistent: isPersistent);
     try {
-      return ref.get().then(
+      return ref.get(adapter).then(
         (items) {
           return items?.entries.map((pair) {
             final tag = pair.key.split('/').last;
@@ -98,7 +103,7 @@ mixin LocalStoreCacheMixIn implements BaseCache {
         },
       );
     } catch (e, s) {
-      await ref.delete();
+      await ref.delete(adapter);
       debugPrint('Failed to parse cached data: $e $s');
     }
     return null;
@@ -110,7 +115,7 @@ mixin LocalStoreCacheMixIn implements BaseCache {
   }) async {
     final CollectionRef ref =
         await _collectionRef(path, isPersistent: isPersistent);
-    return ref.delete();
+    return ref.delete(adapter);
   }
 
   Future<CollectionRef> _collectionRef(
@@ -144,7 +149,7 @@ mixin LocalStoreCacheMixIn implements BaseCache {
     bool isPersistent = false,
   }) async {
     return (await _documentRef(path, name, isPersistent: isPersistent))
-        .set(_zip(item, maxAge, toJson))
+        .set(_zip(item, maxAge, toJson), adapter)
         .then((value) => item);
   }
 
@@ -157,7 +162,7 @@ mixin LocalStoreCacheMixIn implements BaseCache {
   }) async {
     final DocumentRef ref =
         await _documentRef(path, name, isPersistent: isPersistent);
-    final value = await ref.get();
+    final value = await ref.get(adapter);
     final dynamic data = _unzip('$path/$name', value, maxAge);
     if (data == null) {
       // Delete in cache if expired

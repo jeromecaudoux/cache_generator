@@ -5,6 +5,8 @@ import 'package:cache_annotations/annotations.dart';
 abstract class BaseCache {
   Future<Directory> get directory;
 
+  SerializationAdapter get adapter;
+
   Future<void> deleteAll({bool deletePersistent = false});
 
   Future<int> cacheSize();

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cache_annotations/annotations.dart';
 import 'package:cache_generator_example/user.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'cache.g.dart';
@@ -13,7 +14,15 @@ abstract class Cache with LocalStoreCacheMixIn {
   static Cache get instance => _instance;
 
   @override
-  Future<Directory> get directory => getApplicationDocumentsDirectory();
+  Future<Directory> get directory async {
+    if (kIsWeb) {
+      return Directory('/');
+    }
+    return getApplicationDocumentsDirectory();
+  }
+
+  @override
+  SerializationAdapter get adapter => CryptoSerializationAdapter.any(12);
 
   @persistent
   @Cached(path: 'device_id')

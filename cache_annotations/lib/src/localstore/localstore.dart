@@ -6,6 +6,7 @@
 /// Localstore library
 library localstore;
 
+import 'package:cache_annotations/src/serialization_adapter.dart';
 import 'package:path/path.dart' as p;
 import 'dart:math';
 
