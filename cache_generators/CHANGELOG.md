@@ -1,3 +1,7 @@
+## 1.0.11
+
+* Update dependencies: build: ^4.0.0, analyzer: ^8.0.0, source_gen: ^4.0.0
+
 ## 1.0.10
 
 * Add new method `SerializationAdapter get adapter` to allow custom serialization of the cache.
@@ -7,7 +11,7 @@
 * Add new method `deleteCollection` to delete all elements in a specific path.
 * Fix unit tests
 
-* ## 1.0.8
+## 1.0.8
 
 * Fix issue with `directory` not being used correctly
 

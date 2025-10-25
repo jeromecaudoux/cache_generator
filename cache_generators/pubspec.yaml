@@ -1,6 +1,6 @@
 name: cache_generators
 description: "This package is a type conversion generator using source_gen and inspired by Retrofit to help you manage persistent cache."
-version: 1.0.10
+version: 1.0.11
 homepage: https://github.com/jeromecaudoux/cache_generator/
 
 environment:
@@ -10,12 +10,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  build: ^2.4.2
-  source_gen: ^2.0.0
+  build: ^4.0.0
+  source_gen: ^4.0.0
   cache_annotations: ^1.0.10
 #  cache_annotations:
 #    path: ../cache_annotations/
-  analyzer: ^7.0.0
+  analyzer: ^8.0.0
 
 dev_dependencies:
   flutter_test:
