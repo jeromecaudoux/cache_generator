@@ -2,9 +2,8 @@
 
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/visitor.dart';
+import 'package:analyzer/dart/element/visitor2.dart';
 import 'package:cache_annotations/generators.dart';
-import 'package:source_gen/source_gen.dart';
 
 RegExp _cacheEntryReturnRegExp =
     RegExp(r'^CacheEntry<(?<type>[a-zA-Z<>]+\??)>$');
@@ -29,9 +28,7 @@ class CacheEntryMetadata {
   });
 
   String? formatSortBy() {
-    if (sortBy.isEmpty) {
-      return null;
-    }
+    if (sortBy.isEmpty) return null;
     return sortBy.map((e) => '\$$e').join('-');
   }
 
@@ -58,14 +55,14 @@ class KeyMetadata {
 
   String formatPath() {
     String result = path;
-    for (String key in keyParts.keys) {
+    for (final key in keyParts.keys) {
       result = result.replaceAll('{$key}', '\${safePath(${keyParts[key]})}');
     }
     return result;
   }
 }
 
-class Visitor extends SimpleElementVisitor<void> {
+class Visitor extends SimpleElementVisitor2<Object?> {
   final String name;
   String className = '';
   List<CacheEntryMetadata> methods = [];
@@ -73,20 +70,27 @@ class Visitor extends SimpleElementVisitor<void> {
   Visitor(this.name);
 
   DartObject? _methodHasAnnotation(Type annotationType, MethodElement element) {
-    final Iterable<DartObject> annotations =
-        TypeChecker.fromRuntime(annotationType).annotationsOf(element);
-    return annotations.firstOrNull;
+    final want = annotationType.toString().split('<').first;
+    for (final a in element.metadata.annotations) {
+      final obj = a.computeConstantValue();
+      final typeName =
+          obj?.type?.getDisplayString(withNullability: false).split('<').first;
+      if (typeName == want) return obj;
+    }
+    return null;
   }
 
   @override
-  void visitMethodElement(MethodElement element) {
-    String returnType = element.returnType.getDisplayString();
-    RegExpMatch? match = _cacheEntryReturnRegExp.firstMatch(returnType);
+  Object? visitMethodElement(MethodElement element) {
+    final returnType =
+        element.returnType.getDisplayString(withNullability: true);
+    final match = _cacheEntryReturnRegExp.firstMatch(returnType);
+
     if (element.isAbstract && match != null) {
       methods.add(
         CacheEntryMetadata(
           type: match.namedGroup('type')!,
-          name: element.name,
+          name: element.name!,
           parameters: _getParameters(element),
           sortBy: _getSortBy(element),
           key: _getKeyOfMethod(element),
@@ -95,29 +99,31 @@ class Visitor extends SimpleElementVisitor<void> {
         ),
       );
     }
-    super.visitMethodElement(element);
+    return null;
   }
 
   Map<String, String> _getParameters(MethodElement element) {
-    Map<String, String> parameters = {};
-    for (ParameterElement parameter in element.parameters) {
-      // Store every parameters to override the method
-      parameters[parameter.name] = parameter.type.toString();
+    final Map<String, String> parameters = {};
+    for (final parameter in element.formalParameters) {
+      parameters[parameter.name!] = parameter.type.toString();
     }
     return parameters;
   }
 
   Iterable<String> _getSortBy(MethodElement element) {
-    List<String> sortBy = [];
-    for (ParameterElement parameter in element.parameters) {
-      // Look for the key parts
-      for (ElementAnnotation annotation in parameter.metadata) {
-        DartObject obj = annotation.computeConstantValue()!;
-        if (obj.type!.getDisplayString().startsWith('SortBy<')) {
-          String? convert =
+    final List<String> sortBy = [];
+    for (final parameter in element.formalParameters) {
+      for (final annotation in parameter.metadata.annotations) {
+        final obj = annotation.computeConstantValue();
+        if (obj == null) continue;
+
+        final typeName =
+            obj.type?.getDisplayString(withNullability: false) ?? '';
+        if (typeName.startsWith('SortBy<')) {
+          final convert =
               obj.getField('convert')?.toFunctionValue()?.displayName;
-          String name = convert == null
-              ? parameter.name
+          final name = convert == null
+              ? parameter.name!
               : '{$convert(${parameter.name})}';
           if (sortBy.contains(name)) {
             throw Exception('The sortBy $name is already defined');
@@ -130,10 +136,10 @@ class Visitor extends SimpleElementVisitor<void> {
   }
 
   Duration? _getMaxAge(MethodElement element) {
-    DartObject? maxAge = _methodHasAnnotation(MaxAge, element);
+    final maxAge = _methodHasAnnotation(MaxAge, element);
     Duration? duration;
     if (maxAge != null) {
-      dynamic microseconds =
+      final microseconds =
           maxAge.getField('maxAge')?.getField('_duration')?.toIntValue();
       if (microseconds != null) {
         duration = Duration(microseconds: microseconds);
@@ -143,43 +149,47 @@ class Visitor extends SimpleElementVisitor<void> {
   }
 
   KeyMetadata _getKeyOfMethod(MethodElement element) {
-    DartObject? cacheKey = _methodHasAnnotation(Cached, element) ??
+    final cacheKey = _methodHasAnnotation(Cached, element) ??
         _methodHasAnnotation(CacheKey, element);
-    String path = element.name;
+
+    String path = element.name!;
     String? fromJson;
     String? toJson;
-    if (cacheKey != null) {
-      // Look for a key in the method name
-      String? keyName = cacheKey.getField('path')?.toStringValue();
-      if (keyName != null) {
-        path = keyName;
-      }
 
-      // Look for the fromJson and toJson
+    if (cacheKey != null) {
+      final keyName = cacheKey.getField('path')?.toStringValue();
+      if (keyName != null) path = keyName;
       fromJson = cacheKey.getField('fromJson')?.toFunctionValue()?.displayName;
       toJson = cacheKey.getField('toJson')?.toFunctionValue()?.displayName;
     }
-    Map<String, String> keyParts = {};
-    for (ParameterElement parameter in element.parameters) {
-      // Look for the path parts
-      for (ElementAnnotation annotation in parameter.metadata) {
-        DartObject obj = annotation.computeConstantValue()!;
-        if (obj.type!.getDisplayString().startsWith('Path<')) {
-          String name = obj.getField('name')!.toStringValue()!;
-          String? convert =
+
+    final Map<String, String> keyParts = {};
+    for (final parameter in element.formalParameters) {
+      for (final annotation in parameter.metadata.annotations) {
+        final obj = annotation.computeConstantValue();
+        if (obj == null) continue;
+
+        final typeName =
+            obj.type?.getDisplayString(withNullability: false) ?? '';
+        if (typeName.startsWith('Path<')) {
+          final name = obj.getField('name')!.toStringValue()!;
+          final convert =
               obj.getField('convert')?.toFunctionValue()?.displayName;
+
           if (keyParts.containsKey(name)) {
             throw Exception('The path part $name is already defined');
           }
           if (!path.contains('{$name}')) {
             throw Exception('The path part "$name" is not defined in: "$path"');
           }
+
           keyParts[name] = convert == null
-              ? parameter.name
+              ? parameter.name!
               : '{$convert(${parameter.name})}';
         }
       }
     }
+
     return KeyMetadata(
       path,
       keyParts: keyParts,
@@ -189,7 +199,8 @@ class Visitor extends SimpleElementVisitor<void> {
   }
 
   @override
-  void visitConstructorElement(ConstructorElement element) {
-    className = element.returnType.toString();
+  Object? visitConstructorElement(ConstructorElement element) {
+    className = element.returnType.getDisplayString(withNullability: true);
+    return null;
   }
 }
