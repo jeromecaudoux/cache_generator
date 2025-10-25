@@ -1,6 +1,7 @@
 ## 1.0.11
 
 * Update dependencies: build: ^4.0.0, analyzer: ^8.0.0, source_gen: ^4.0.0
+* Migrate code using visitor to visitor2
 
 ## 1.0.10
 
