@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
+import 'dart:typed_data';
 
 import 'package:cache_annotations/src/serialization_adapter.dart';
 
@@ -38,11 +39,46 @@ class Utils implements UtilsImpl {
       final data = await _readFromStorage(path);
       final id = path.substring(path.lastIndexOf('/') + 1, path.length);
       if (data is Map<String, dynamic>) {
-        if (data.containsKey(id)) return data[id];
+        if (data.containsKey(id)) {
+          final rawValue = data[id];
+          final normalized = _normalizeForAdapter(rawValue);
+          return adapter.deserialize(normalized);
+        }
         return null;
       }
     }
     return null;
+  }
+
+  /// Converts values coming from localStorage/JSON into what the adapter expects.
+  /// - If it's already a Uint8List or ByteBuffer, keep it.
+  /// - If it's a JS array/List of numbers, convert -> Uint8List.
+  /// - If it's a base64 String, decode to bytes.
+  /// Otherwise return as-is.
+  dynamic _normalizeForAdapter(dynamic value) {
+    if (value is Uint8List) return value;
+
+    if (value is ByteBuffer) {
+      return value.asUint8List();
+    }
+
+    if (value is List) {
+      // Convert List<dynamic>/List<num> to List<int> then Uint8List
+      final ints = value.map((e) => (e as num).toInt()).toList(growable: false);
+      return Uint8List.fromList(ints);
+    }
+
+    if (value is String) {
+      // If you sometimes store base64 strings:
+      try {
+        final bytes = base64.decode(value);
+        return Uint8List.fromList(bytes);
+      } catch (_) {
+        // Not base64; return as-is.
+      }
+    }
+
+    return value;
   }
 
   @override
@@ -173,17 +209,20 @@ class Utils implements UtilsImpl {
   Future<dynamic> _deleteFromStorage(String path) async {
     if (path.endsWith('/')) {
       // If path is a directory path
-      final dataCol = html.window.localStorage.entries.singleWhere(
-        (element) => element.key == path,
-        orElse: () => const MapEntry('', ''),
+      final res = html.window.localStorage.entries.where(
+        (element) {
+          return element.key.startsWith(path);
+        },
       );
 
-      try {
-        if (dataCol.key != '') {
-          html.window.localStorage.remove(dataCol.key);
+      for (final dataCol in res) {
+        try {
+          if (dataCol.key != '') {
+            html.window.localStorage.remove(dataCol.key);
+          }
+        } catch (error) {
+          rethrow;
         }
-      } catch (error) {
-        rethrow;
       }
     } else {
       // If path is a file path

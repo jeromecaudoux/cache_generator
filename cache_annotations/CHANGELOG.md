@@ -1,3 +1,7 @@
+## 1.0.12
+
+* Fix read and delete issues on web platform
+
 ## 1.0.11
 
 * Update dependencies: build: ^4.0.0, analyzer: ^8.0.0, source_gen: ^4.0.0
