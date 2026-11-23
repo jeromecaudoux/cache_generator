@@ -19,7 +19,14 @@ class DocumentRef implements DocumentRefImpl {
   static final _cache = <String, DocumentRef>{};
 
   static void clearCache(String path) {
-    _cache.removeWhere((key, value) => key.startsWith(path));
+    _cache.removeWhere((key, value) {
+      if (!key.startsWith(path)) {
+        return false;
+      }
+      // Someone may still hold a reference to this document.
+      value._data.clear();
+      return true;
+    });
   }
 
   /// Returns an instance using the default [DocumentRef].

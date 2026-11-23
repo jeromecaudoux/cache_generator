@@ -43,10 +43,14 @@ mixin LocalStoreCacheMixIn implements BaseCache {
 
   @override
   Future<int> cacheSize() async {
+    if (kIsWeb) {
+      return 0;
+    }
     final Directory docDir = await directory;
     String path =
         '${docDir.path}${(await _ensureDb).path}.collection$_separator$_notPersistentKey';
-    return _directorySize(path);
+    // Walking the whole cache directory is slow: never do it on the UI thread.
+    return compute(_directorySize, path);
   }
 
   static int _directorySize(String dirPath) {

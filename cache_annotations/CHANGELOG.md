@@ -1,3 +1,12 @@
+## 1.0.13
+
+* Fix ANRs on Android: all the file accesses are now asynchronous (no more synchronous I/O on the UI thread, which is also the Android main thread since Flutter 3.29).
+* Reading or writing a document no longer reads every other document of its collection.
+* Operations on the same document are applied in the order they were requested (a pending write can no longer re-create a deleted document).
+* Documents bigger than 100 KB are deserialized in a background isolate.
+* `cacheSize()` computes the directory size in a background isolate.
+* Deleting a collection no longer reads all its documents.
+
 ## 1.0.12
 
 * Fix read and delete issues on web platform

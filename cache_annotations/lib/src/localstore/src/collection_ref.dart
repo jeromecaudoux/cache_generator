@@ -91,16 +91,9 @@ class CollectionRef implements CollectionRefImpl {
   @override
   Future<void> delete(SerializationAdapter adapter) async {
     _cache.removeWhere((key, value) => key.startsWith(path));
+    // Clears the in-memory data of the documents of this collection without
+    // reading every file from the disk.
     DocumentRef.clearCache(path);
-
-    final docs = await _utils.get(path, adapter, true, _conditions);
-
-    if (docs != null) {
-      for (var key in docs.keys) {
-        final id = key.split(pathSeparatorRegEx).last;
-        DocumentRef(id, this)._data.clear();
-      }
-    }
     await _utils.delete(path);
   }
 }
